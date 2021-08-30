@@ -61,6 +61,13 @@ impl User {
     }
 }
 
+// Impl Clone for user
+impl Clone for User {
+    fn clone(&self) -> User {
+        User::new(self.email.clone(), self.name.clone())
+    }
+}
+
 /// Impl Mailer
 impl Mailer {
     /// Make a new mailer
@@ -91,13 +98,17 @@ impl Mailer {
         let mut count = 0;
         for user in &self.to {
             // Build the message
-            let email = Message::builder()
+            let email = match Message::builder()
                 .from((&self.from.to_string()).parse().unwrap())
                 .to(user.to_string().parse().unwrap())
                 .subject(&self.subject)
                 .header(header::ContentType::TEXT_HTML)
-                .body(String::from(&self.body))
-                .unwrap();
+                .body(String::from(&self.body).replace("{{NAME}}", &user.name))
+            {
+                // lil bodge {}
+                Ok(email) => email,
+                Err(_) => return Err(EmailError::MessageBuild),
+            };
 
             // Get credentials for mail server
             let creds = Credentials::new(
@@ -106,10 +117,10 @@ impl Mailer {
             );
 
             // Open a remote connection to the mail server
-            let mailer = SmtpTransport::relay(&self.server)
-                .unwrap()
-                .credentials(creds)
-                .build();
+            let mailer = match SmtpTransport::relay(&self.server) {
+                Ok(mailer) => mailer.credentials(creds).build(),
+                Err(_) => return Err(EmailError::Authentication),
+            };
 
             // Send the email
             match mailer.send(&email) {

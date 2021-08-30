@@ -101,6 +101,7 @@ version = "0.1.0"
 dependencies = [
  "chrono",
  "lettre",
+ "rand",
  "simple_config_parser",
 ]
 
