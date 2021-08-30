@@ -14,7 +14,7 @@ mod arg_parse;
 mod email;
 use color::Color;
 
-const VERSION: &str = "0.0.1";
+const VERSION: &str = "2.1.0";
 const SPINNER: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 fn main() {
@@ -122,7 +122,7 @@ fn random_fotd(path: String) -> String {
 }
 
 fn user_array_from_file(path: &str) -> Vec<email::User> {
-    let all_users = fs::read_to_string(&path).expect("Error Reading User File");
+    let all_users = fs::read_to_string(&path).expect("Error Reading User File").replace("\r", "");
     let users: Vec<&str> = all_users.split("\n").collect();
     let mut users_vec: Vec<email::User> = Vec::new();
     for user in users {

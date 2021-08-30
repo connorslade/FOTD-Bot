@@ -61,6 +61,13 @@ impl User {
     }
 }
 
+/// Impl Debug for User
+impl std::fmt::Debug for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} <{}>", self.name, self.email)
+    }
+}
+
 // Impl Clone for user
 impl Clone for User {
     fn clone(&self) -> User {
