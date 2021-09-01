@@ -1,4 +1,5 @@
+#![allow(clippy::module_inception)]
 #[macro_use]
 pub mod color;
-pub mod common;
 pub mod arg_parse;
+pub mod common;

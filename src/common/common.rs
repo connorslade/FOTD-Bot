@@ -1,6 +1,6 @@
 /// Get the type MMIE content type of a file from its extension
 pub fn get_type(path: &str) -> &str {
-    match path.split(".").last() {
+    match path.split('.').last() {
         Some(ext) => match ext {
             "html" => "text/html",
             "css" => "text/css",
@@ -78,7 +78,7 @@ impl Query {
     /// Get a value from a key
     pub fn get(&self, key: &str) -> Option<String> {
         for i in self.data.clone() {
-            if &i[0] == key {
+            if i[0] == key {
                 return Some(i[1].clone());
             }
         }

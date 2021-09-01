@@ -45,6 +45,11 @@ fn main() {
     let sender_name = cfg_get(&config, "senderName");
     let username = cfg_get(&config, "username");
     let password = cfg_get(&config, "password");
+    let web_auth = web::Auth::new(
+        cfg_get(&config, "username"),
+        cfg_get(&config, "password"),
+        cfg_get(&config, "server"),
+    );
 
     // Start the webserver in another thread
     if cfg_get(&config, "webServer").to_lowercase() == "true" {
@@ -59,7 +64,7 @@ fn main() {
         );
 
         thread::spawn(move || {
-            web::start(&ip, port);
+            web::start(&ip, port, web_auth);
         });
     }
 
@@ -119,13 +124,13 @@ fn main() {
 
 fn cfg_get(cfg: &Config, key: &str) -> String {
     cfg.get(key)
-        .expect(&format!("The key '{}' was not defined in config :/", key))
+        .unwrap_or_else(|| panic!("The key '{}' was not defined in config :/", key))
 }
 
 fn random_fotd(path: String) -> String {
     // Read Facts and pick a random one
     let all_facts = fs::read_to_string(&path).expect("Error Reading Fact File");
-    let facts: Vec<&str> = all_facts.split("\n").collect();
+    let facts: Vec<&str> = all_facts.split('\n').collect();
     let mut rng = rand::thread_rng();
     let fact = &facts.choose(&mut rng).unwrap();
 
@@ -136,7 +141,7 @@ fn random_fotd(path: String) -> String {
             continue;
         }
         new_facts.push_str(f);
-        new_facts.push_str("\n");
+        new_facts.push('\n');
     }
     fs::write(&path, new_facts).expect("Error ReWriting Fact File");
 
@@ -148,7 +153,7 @@ fn user_array_from_file(path: &str) -> Vec<email::User> {
     let all_users = fs::read_to_string(&path)
         .expect("Error Reading User File")
         .replace("\r", "");
-    let users: Vec<&str> = all_users.split("\n").collect();
+    let users: Vec<&str> = all_users.split('\n').collect();
     let mut users_vec: Vec<email::User> = Vec::new();
     for user in users {
         users_vec.push(email::User::user_from_email(user));
@@ -163,7 +168,7 @@ struct SendTime {
 
 impl SendTime {
     fn from_str(time: &str) -> Self {
-        let time_parts: Vec<&str> = time.split(":").collect();
+        let time_parts: Vec<&str> = time.split(':').collect();
         SendTime {
             hour: time_parts[0].parse::<u32>().expect("Invalid Send Hour"),
             minute: time_parts[1].parse::<u32>().expect("Invalid Send Minute"),

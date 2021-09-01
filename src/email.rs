@@ -30,7 +30,7 @@ pub struct Mailer {
     pub body: String,
     pub credentials: Creds,
     pub server: String,
-    foreach: Option<Box<dyn Fn () -> ()>>,
+    foreach: Option<Box<dyn Fn()>>,
 }
 
 pub struct User {
@@ -50,15 +50,17 @@ impl User {
         User { email, name }
     }
 
-    /// Get user as a string
-    pub fn to_string(&self) -> String {
-        format!("{} <{}>", self.name, self.email)
-    }
-
     pub fn user_from_email(email: &str) -> User {
         let mut split = email.split('@');
         let name = split.next().unwrap();
         User::new(email.to_string(), name.to_string())
+    }
+}
+
+// Impl to_string for User
+impl std::fmt::Display for User {
+    fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+        write!(f, "{} <{}>", self.name, self.email)
     }
 }
 
@@ -140,7 +142,7 @@ impl Mailer {
         Ok(count)
     }
 
-    pub fn add_foreach(&mut self, f: Box<dyn Fn () -> ()>) {
+    pub fn add_foreach(&mut self, f: Box<dyn Fn()>) {
         self.foreach = Some(f);
     }
 }
