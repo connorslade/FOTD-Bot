@@ -72,7 +72,7 @@ fn main() {
                 let fotd = random_fotd(cfg_get(&config, "factPath"));
 
                 // Init Mailer and add some users
-                let mailer = email::Mailer::new(
+                let mut mailer = email::Mailer::new(
                     users.to_vec(),
                     email::User::new(username.clone(), sender_name.clone()),
                     &subject.replace("&1", &local_date),
@@ -83,6 +83,10 @@ fn main() {
                     &username,
                     &password,
                 );
+
+                mailer.add_foreach(Box::new(|| {
+                    println!("Hola World");
+                }));
 
                 mailer.send_all().expect("Error Sending Mail...");
             }
@@ -122,7 +126,9 @@ fn random_fotd(path: String) -> String {
 }
 
 fn user_array_from_file(path: &str) -> Vec<email::User> {
-    let all_users = fs::read_to_string(&path).expect("Error Reading User File").replace("\r", "");
+    let all_users = fs::read_to_string(&path)
+        .expect("Error Reading User File")
+        .replace("\r", "");
     let users: Vec<&str> = all_users.split("\n").collect();
     let mut users_vec: Vec<email::User> = Vec::new();
     for user in users {

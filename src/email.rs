@@ -30,6 +30,7 @@ pub struct Mailer {
     pub body: String,
     pub credentials: Creds,
     pub server: String,
+    foreach: Option<Box<dyn Fn () -> ()>>,
 }
 
 pub struct User {
@@ -97,6 +98,7 @@ impl Mailer {
                 password: password.to_string(),
             },
             server: server.to_string(),
+            foreach: None,
         }
     }
 
@@ -136,5 +138,9 @@ impl Mailer {
             }
         }
         Ok(count)
+    }
+
+    pub fn add_foreach(&mut self, f: Box<dyn Fn () -> ()>) {
+        self.foreach = Some(f);
     }
 }
