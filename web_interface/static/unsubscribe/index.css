@@ -1,0 +1,19 @@
+body {
+  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+  background-color: #17171a;
+  color: white;
+  padding-left: 10px;
+}
+
+.footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  text-align: right;
+}
+.footer * {
+  color: #232325;
+  padding-right: 25px;
+}
+
+/*# sourceMappingURL=index.css.map */
