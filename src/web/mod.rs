@@ -6,13 +6,14 @@ use lettre::SmtpTransport;
 use lettre::Transport;
 use std::fs;
 
-mod common;
+use super::common::common;
 
 /// Dir to find files to serve
-const DATA_DIR: &str = "static";
+const DATA_DIR: &str = "data/web";
 
-fn main() {
-    let mut server: Server = Server::new("localhost", 1800);
+// TODO: Split Routes up into separate files
+pub fn start(ip: &str, port: u16) {
+    let mut server: Server = Server::new(ip, port);
 
     // Add Logger and Rate Limiter
     Logger::attach(&mut server, Logger::new(Level::Info, None, true));
@@ -69,8 +70,8 @@ fn main() {
         };
 
         let auth = Auth {
-            username: "connorslade@bernardsboe.com".to_string(),
-            password: "305931".to_string(),
+            username: "".to_string(),
+            password: "".to_string(),
             server: "smtp.gmail.com".to_string(),
         };
         quick_email(auth, email.clone(), "FOTD BOT Unnsub".to_string(), "<a href=\"https://duck.com\">UNSUB</a>".to_string());
@@ -85,7 +86,6 @@ fn main() {
         )
     });
 
-    println!("Listening on http://localhost:1800");
     server.start();
 }
 
@@ -95,7 +95,7 @@ struct Auth {
     server: String,
 }
 
-///
+// TODO: Remove this
 fn quick_email(auth: Auth, to: String, subject: String, body: String) -> Option<()> {
     // Build the message
     let email = match Message::builder()

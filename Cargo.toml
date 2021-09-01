@@ -1,12 +1,13 @@
 [package]
 name = "fotd_email_bot"
-version = "0.1.0"
+version = "2.2.0"
 authors = ["Connor Slade <connor@connorcode.com>"]
 edition = "2018"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+afire = "0.1.2"
 simple_config_parser = "0.1.5"
 lettre = "0.10.0-rc.3"
 chrono = "0.4"

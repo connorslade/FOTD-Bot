@@ -9,12 +9,13 @@ use rand::prelude::*;
 use simple_config_parser::config::Config;
 
 #[macro_use]
-mod color;
-mod arg_parse;
+mod common;
 mod email;
-use color::Color;
+mod web;
+use common::color::*;
+use common::*;
 
-const VERSION: &str = "2.1.0";
+const VERSION: &str = "2.2.0";
 const SPINNER: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 fn main() {
@@ -45,8 +46,26 @@ fn main() {
     let username = cfg_get(&config, "username");
     let password = cfg_get(&config, "password");
 
+    // Start the webserver in another thread
+    if cfg_get(&config, "webServer").to_lowercase() == "true" {
+        let ip = cfg_get(&config, "webHost");
+        let port = cfg_get(&config, "webPort").parse::<u16>().unwrap_or(8080);
+
+        color_print!(
+            Color::Magenta,
+            "[*] Starting Web Server {}:{}",
+            &ip,
+            &port.to_string()
+        );
+
+        thread::spawn(move || {
+            web::start(&ip, port);
+        });
+    }
+
     let mut locked = false;
 
+    // TODO: Put this in its own file
     loop {
         for i in SPINNER.iter() {
             thread::sleep(Duration::from_millis(100));
