@@ -7,3 +7,4 @@ edition = "2018"
 
 [dependencies]
 afire = { git = "https://github.com/Basicprogrammer10/afire.git" }
+lettre = "0.10.0-rc.3"

@@ -1,4 +1,9 @@
 use afire::*;
+use lettre::message::header;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::Message;
+use lettre::SmtpTransport;
+use lettre::Transport;
 use std::fs;
 
 /// Dir to find files to serve
@@ -7,7 +12,9 @@ const DATA_DIR: &str = "static";
 fn main() {
     let mut server: Server = Server::new("localhost", 1800);
 
+    // Add Logger and Rate Limiter
     Logger::attach(&mut server, Logger::new(Level::Info, None, true));
+    RateLimiter::attach(&mut server, 10, 30);
 
     // Serve Static files from DATA_DIR
     server.all(|req| {
@@ -18,7 +25,7 @@ fn main() {
         }
 
         // Also add '/index.html' if path dose not end with a file
-        if !path.split('/').last().unwrap().contains('.') {
+        if !path.split('/').last().unwrap_or_default().contains('.') {
             path.push_str("/index.html");
         }
 
@@ -59,10 +66,20 @@ fn main() {
             None => return Response::new(400, "Invalid Reason", vec![]),
         };
 
+        let auth = Auth {
+            username: "".to_string(),
+            password: "".to_string(),
+            server: "smtp.gmail.com".to_string(),
+        };
+        quick_email(auth, email.clone(), "FOTD BOT Unnsub".to_string(), "<a href=\"https://duck.com\">UNSUB</a>".to_string());
+
         Response::new(
             200,
-            "i hate you.\n - FOTD BOT",
-            vec![Header::new("Content-Type", "text/plain")],
+            &fs::read_to_string(format!("{}/unsubscribe/done/index.html", DATA_DIR))
+                .unwrap_or("done. email sent to {{EMAIL}} to confirm unsub.".to_string())
+                .replace("{{EMAIL}}", &email)
+                .replace("{{WHY}}", &why),
+            vec![Header::new("Content-Type", "text/html")],
         )
     });
 
@@ -101,6 +118,46 @@ fn append_frag(text: &mut String, frag: &mut String) {
             .collect::<Vec<u8>>();
         text.push_str(&std::str::from_utf8(&encoded).unwrap());
         frag.clear();
+    }
+}
+
+struct Auth {
+    username: String,
+    password: String,
+    server: String,
+}
+
+///
+fn quick_email(auth: Auth, to: String, subject: String, body: String) -> Option<()> {
+    // Build the message
+    let email = match Message::builder()
+        .from(auth.username.parse().unwrap())
+        .to(to.parse().unwrap())
+        .subject(subject)
+        .header(header::ContentType::TEXT_HTML)
+        .body(body)
+    {
+        // lil bodge {}
+        Ok(email) => email,
+        Err(_) => return None,
+    };
+
+    // Get credentials for mail server
+    let creds = Credentials::new(
+        auth.username,
+        auth.password
+    );
+
+    // Open a remote connection to the mail server
+    let mailer = match SmtpTransport::relay(&auth.server) {
+        Ok(mailer) => mailer.credentials(creds).build(),
+        Err(_) => return None,
+    };
+
+    // Send the email
+    match mailer.send(&email) {
+        Ok(_) => return Some(()),
+        Err(_) => return None,
     }
 }
 
