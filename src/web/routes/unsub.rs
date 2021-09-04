@@ -59,7 +59,7 @@ pub fn add_route(
         let query = Query::from_body(req.body);
 
         let email = match query.get("email") {
-            Some(email) => common::decode_url_chars(&email),
+            Some(email) => common::decode_url_chars(&email).to_lowercase(),
             None => return Response::new(400, "Invalid Email", vec![]),
         };
 
@@ -141,7 +141,7 @@ pub fn add_route(
 
         // Get email from hashmap
         let email = match unsafe { UNSUB_CODES.as_ref().unwrap() }.get(&code) {
-            Some(email) => email.clone(),
+            Some(email) => email.clone().to_lowercase(),
             None => return Response::new(400, "Invalid Code - Sorwy", vec![]),
         };
 
