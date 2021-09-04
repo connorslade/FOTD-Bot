@@ -40,7 +40,7 @@ pub fn add_route(
             None => return Response::new(400, "Invalid Email", vec![]),
         };
 
-        if email == "" {
+        if email.is_empty() {
             return Response::new(400, "Invalid Email", vec![]);
         }
 
@@ -72,7 +72,7 @@ pub fn add_route(
                 .insert(random_chars.clone(), email.clone());
         }
         let mut confirm_url = unsafe { BASE_URL.clone() }
-            .unwrap_or("https://www.youtube.com/watch?v=mKwj3efLxbc".to_string());
+            .unwrap_or_else(|| "https://www.youtube.com/watch?v=mKwj3efLxbc".to_string());
         confirm_url.push_str(&format!("/subscribe/confirm?code={}", random_chars));
 
         // Try to read File
@@ -112,11 +112,11 @@ pub fn add_route(
             None => return Response::new(400, "Invalid Code - Sorwy", vec![]),
         };
 
-        if email == "" {
+        if email.is_empty() {
             return Response::new(400, "Invalid Email", vec![]);
         }
 
-        if code == "" {
+        if code.is_empty() {
             return Response::new(400, "Invalid Code", vec![]);
         }
 

@@ -32,10 +32,10 @@ pub fn start(
     // Process Sub requests
     routes::sub::add_route(
         &mut server,
-        email_auth.clone(),
-        base_url.clone(),
-        template_path.clone(),
-        user_path.clone(),
+        email_auth,
+        base_url,
+        template_path,
+        user_path
     );
 
     server.start();
