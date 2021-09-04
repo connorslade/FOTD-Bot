@@ -139,7 +139,7 @@ pub fn add_route(
         )
     });
 
-    server.route(Method::GET, "/unsubscribe/confirm", |req| {
+    server.route(Method::GET, "/unsubscribe/confirm/real", |req| {
         let code = match req.query.get("code") {
             Some(code) => common::decode_url_chars(&code),
             None => return Response::new(400, "No Code supplied???", vec![]),
@@ -171,8 +171,11 @@ pub fn add_route(
                 Err(_) => return Response::new(500, "Internal Error...", vec![]),
             };
 
-        // Remove from file
-        user_file = user_file.replace(&format!("{}\n", email), "");
+        // Remove email from file
+        user_file = user_file.replace(&email, "").replace("\n\n", "\n");
+        if user_file.starts_with("\n") {
+            user_file.pop();
+        }
 
         // Write to file
         fs::write(unsafe { USER_PATH.clone() }.unwrap_or_default(), user_file)
