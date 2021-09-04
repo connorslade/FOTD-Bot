@@ -76,6 +76,17 @@ pub fn add_route(
             return Response::new(400, "Invalid Reason", vec![]);
         }
 
+        // Check if email is in database
+        let content = fs::read_to_string(unsafe { USER_PATH.clone() }.unwrap_or_default())
+            .unwrap_or_default();
+        if !content.contains(&email) {
+            return Response::new(
+                200,
+                "You're not even subscribed.\nwhat are you trying to do???",
+                vec![],
+            );
+        }
+
         // Get confirm Url
         let random_chars = rand::thread_rng()
             .sample_iter(&rand::distributions::Alphanumeric)
@@ -164,6 +175,9 @@ pub fn add_route(
         // Get a random Quote
         let quote = &QUOTES[rand::thread_rng().gen_range(0..QUOTES.len())];
 
+        let base_url = &unsafe { BASE_URL.clone() }
+            .unwrap_or_else(|| "https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_string());
+
         Response::new(
             200,
             &fs::read_to_string(format!("{}/unsubscribe/done/allDone.html", DATA_DIR))
@@ -173,7 +187,8 @@ pub fn add_route(
                 })
                 .replace("{{EMAIL}}", &email)
                 .replace("{{QUOTE}}", &quote.quote)
-                .replace("{{AUTHOR}}", &quote.author),
+                .replace("{{AUTHOR}}", &quote.author)
+                .replace("{{BASE_URL}}", base_url),
             vec![Header::new("Content-Type", "text/html")],
         )
     });
