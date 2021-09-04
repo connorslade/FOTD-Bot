@@ -1,5 +1,6 @@
 use afire::*;
 
+pub use super::email::{quick_email, Auth};
 mod routes;
 
 pub fn start(
@@ -14,31 +15,28 @@ pub fn start(
 
     // Add Logger and Rate Limiter
     Logger::attach(&mut server, Logger::new(Level::Info, None, true));
-    RateLimiter::attach(&mut server, 10, 30);
+    // RateLimiter::attach(&mut server, 10, 30);
 
     // Serve Static files from DATA_DIR
     routes::serve_static::add_route(&mut server);
 
     // Process Unsub requests
-    routes::unsub::add_route(&mut server, email_auth, base_url, template_path, user_path);
+    routes::unsub::add_route(
+        &mut server,
+        email_auth.clone(),
+        base_url.clone(),
+        template_path.clone(),
+        user_path.clone(),
+    );
+
+    // Process Sub requests
+    routes::sub::add_route(
+        &mut server,
+        email_auth.clone(),
+        base_url.clone(),
+        template_path.clone(),
+        user_path.clone(),
+    );
 
     server.start();
-}
-
-pub struct Auth {
-    username: String,
-    password: String,
-    name: String,
-    server: String,
-}
-
-impl Auth {
-    pub fn new(username: String, password: String, name: String, server: String) -> Auth {
-        Auth {
-            username,
-            password,
-            name,
-            server,
-        }
-    }
 }

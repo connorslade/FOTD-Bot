@@ -146,3 +146,66 @@ impl Mailer {
         self.foreach = Some(f);
     }
 }
+
+pub struct Auth {
+    username: String,
+    password: String,
+    name: String,
+    server: String,
+}
+
+impl Auth {
+    pub fn new(username: String, password: String, name: String, server: String) -> Auth {
+        Auth {
+            username,
+            password,
+            name,
+            server,
+        }
+    }
+}
+
+impl Clone for Auth {
+    fn clone(&self) -> Self {
+        Auth {
+            username: self.username.clone(),
+            password: self.password.clone(),
+            name: self.name.clone(),
+            server: self.server.clone(),
+        }
+    }
+}
+
+pub fn quick_email(email_auth: &mut Auth, to: String, subject: String, body: String) -> Option<()> {
+    // Build the message
+    let email = match Message::builder()
+        .from(
+            format!("{} <{}>", email_auth.name, email_auth.username)
+                .parse()
+                .unwrap(),
+        )
+        .to(to.parse().unwrap())
+        .subject(subject)
+        .header(header::ContentType::TEXT_HTML)
+        .body(body)
+    {
+        // lil bodge {}
+        Ok(email) => email,
+        Err(_) => return None,
+    };
+
+    // Get credentials for mail server
+    let creds = Credentials::new(email_auth.username.clone(), email_auth.password.clone());
+
+    // Open a remote connection to the mail server
+    let mailer = match SmtpTransport::relay(&email_auth.server) {
+        Ok(mailer) => mailer.credentials(creds).build(),
+        Err(_) => return None,
+    };
+
+    // Send the email
+    match mailer.send(&email) {
+        Ok(_) => Some(()),
+        Err(_) => None,
+    }
+}
