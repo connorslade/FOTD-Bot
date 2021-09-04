@@ -142,8 +142,7 @@ pub fn add_route(
             200,
             &fs::read_to_string(format!("{}/subscribe/done/allDone.html", DATA_DIR))
                 .unwrap_or_else(|_| {
-                    "done. you ({{EMAIL}}) will no longer get amazing daily facts in your inbox :/"
-                        .to_string()
+                    "Done! You ({{EMAIL}}) will now get daily facts in your inbox!".to_string()
                 })
                 .replace("{{EMAIL}}", &email),
             vec![Header::new("Content-Type", "text/html")],
