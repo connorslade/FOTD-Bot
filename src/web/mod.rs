@@ -30,13 +30,7 @@ pub fn start(
     );
 
     // Process Sub requests
-    routes::sub::add_route(
-        &mut server,
-        email_auth,
-        base_url,
-        template_path,
-        user_path
-    );
+    routes::sub::add_route(&mut server, email_auth, base_url, template_path, user_path);
 
     server.start();
 }

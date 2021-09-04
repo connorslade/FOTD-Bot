@@ -30,7 +30,7 @@ pub struct Mailer {
     pub body: String,
     pub credentials: Creds,
     pub server: String,
-    foreach: Option<Box<dyn Fn()>>,
+    foreach: Option<Box<dyn Fn(User)>>,
 }
 
 pub struct User {
@@ -108,6 +108,11 @@ impl Mailer {
     pub fn send_all(&self) -> Result<u32, EmailError> {
         let mut count = 0;
         for user in &self.to {
+            // Run Foreach
+            if let Some(f) = &self.foreach {
+                f(user.clone());
+            }
+
             // Build the message
             let email = match Message::builder()
                 .from((&self.from.to_string()).parse().unwrap())
@@ -142,7 +147,7 @@ impl Mailer {
         Ok(count)
     }
 
-    pub fn add_foreach(&mut self, f: Box<dyn Fn()>) {
+    pub fn add_foreach(&mut self, f: Box<dyn Fn(User)>) {
         self.foreach = Some(f);
     }
 }

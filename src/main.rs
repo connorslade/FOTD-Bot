@@ -79,7 +79,7 @@ fn main() {
         for i in SPINNER.iter() {
             thread::sleep(Duration::from_millis(100));
             print!(
-                "\r{} {}",
+                "\x1b[2K\r{} {}",
                 color::color(&format!("[{}] Waiting...", i), Color::Cyan),
                 color::color(
                     &format!("[{}:{}]", Local::now().hour(), Local::now().minute()),
@@ -114,8 +114,12 @@ fn main() {
                     &password,
                 );
 
-                mailer.add_foreach(Box::new(|| {
-                    println!("Hola World");
+                mailer.add_foreach(Box::new(|user| {
+                    print!(
+                        "\r{}",
+                        color::color(&format!("[*] Sending: {}", user.email), Color::Yellow)
+                    );
+                    std::io::stdout().flush().expect("Err flushing STD Out");
                 }));
 
                 mailer.send_all().expect("Error Sending Mail...");
