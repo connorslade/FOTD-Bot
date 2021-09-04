@@ -36,13 +36,14 @@ pub fn add_route(
 
         // Get email address
         let email = match query.get("email") {
-            Some(email) => common::decode_url_chars(&email).to_lowercase(),
+            Some(email) => {
+                if email.is_empty() {
+                    return Response::new(400, "Email is empty", vec![]);
+                }
+                common::decode_url_chars(&email).to_lowercase()
+            }
             None => return Response::new(400, "Invalid Email", vec![]),
         };
-
-        if email.is_empty() {
-            return Response::new(400, "Invalid Email", vec![]);
-        }
 
         // If email is already subscribed dont send email etc.
         let content = fs::read_to_string(unsafe { USER_PATH.clone() }.unwrap_or_default())
@@ -72,7 +73,7 @@ pub fn add_route(
                 .insert(random_chars.clone(), email.clone());
         }
         let mut confirm_url = unsafe { BASE_URL.clone() }
-            .unwrap_or_else(|| "https://www.youtube.com/watch?v=mKwj3efLxbc".to_string());
+            .unwrap_or_else(|| "https://www.youtube.com/watch?v=mKwj    efLxbc".to_string());
         confirm_url.push_str(&format!("/subscribe/confirm?code={}", random_chars));
 
         // Try to read File
@@ -100,30 +101,30 @@ pub fn add_route(
         )
     });
 
-    server.route(Method::GET, "/subscribe/confirm", |req| {
+    server.route(Method::GET, "/subscribe/confirm/real", |req| {
         let code = match req.query.get("code") {
-            Some(code) => common::decode_url_chars(&code),
+            Some(code) => {
+                if code.is_empty() {
+                    return Response::new(400, "Invalid Code", vec![]);
+                }
+                common::decode_url_chars(&code)
+            }
             None => return Response::new(400, "No Code supplied???", vec![]),
         };
 
         // Get email from hashmap
         let email = match unsafe { SUB_CODES.as_ref().unwrap() }.get(&code) {
-            Some(email) => email.clone().to_lowercase(),
+            Some(email) => {
+                if email.is_empty() {
+                    return Response::new(400, "Invalid Code", vec![]);
+                }
+                common::decode_url_chars(email).to_lowercase()
+            }
             None => return Response::new(400, "Invalid Code - Sorwy", vec![]),
         };
 
-        if email.is_empty() {
-            return Response::new(400, "Invalid Email", vec![]);
-        }
-
-        if code.is_empty() {
-            return Response::new(400, "Invalid Code", vec![]);
-        }
-
         // Remove from hashmap
-        unsafe {
-            SUB_CODES.as_mut().unwrap().remove(&code);
-        }
+        unsafe { SUB_CODES.as_mut() }.unwrap().remove(&code);
 
         // Add User to 'database'
         let mut user_file =

@@ -34,8 +34,8 @@ const QUOTES: [Quote; 6] = [
     },
     Quote {
         quote: "You always have a choice. It's just that some people make the wrong one.",
-        author: "Nicholas Sparks"
-    }
+        author: "Nicholas Sparks",
+    },
 ];
 
 static mut AUTH: Option<Auth> = None;
@@ -63,22 +63,24 @@ pub fn add_route(
         let query = Query::from_body(req.body);
 
         let email = match query.get("email") {
-            Some(email) => common::decode_url_chars(&email).to_lowercase(),
+            Some(email) => {
+                if email.is_empty() {
+                    return Response::new(400, "Invalid Email", vec![]);
+                }
+                common::decode_url_chars(&email).to_lowercase()
+            }
             None => return Response::new(400, "Invalid Email", vec![]),
         };
 
         let why = match query.get("why") {
-            Some(why) => common::decode_url_chars(&why),
+            Some(why) => {
+                if why.is_empty() {
+                    return Response::new(400, "Invalid Reason", vec![]);
+                }
+                common::decode_url_chars(&why)
+            }
             None => return Response::new(400, "Invalid Reason", vec![]),
         };
-
-        if email.is_empty() {
-            return Response::new(400, "Invalid Email", vec![]);
-        }
-
-        if why.is_empty() {
-            return Response::new(400, "Invalid Reason", vec![]);
-        }
 
         // Check if email is in database
         let content = fs::read_to_string(unsafe { USER_PATH.clone() }.unwrap_or_default())
