@@ -11,13 +11,13 @@ use super::super::Auth;
 const DATA_DIR: &str = "data/web";
 
 /// Fun Quotes to show on unsubscribe page
-const QUOTES: [Quote; 5] = [
+const QUOTES: [Quote; 6] = [
     Quote {
         quote: "Go, throw yourself into the sea!",
         author: "Jesus",
     },
     Quote {
-        quote: "Im not mad im just dissapointed",
+        quote: "Im not mad im just disappointed",
         author: "Every Parent Ever",
     },
     Quote {
@@ -32,6 +32,10 @@ const QUOTES: [Quote; 5] = [
         quote: "Simba, I'm very disappointed in you.",
         author: "Mufasa",
     },
+    Quote {
+        quote: "You always have a choice. It's just that some people make the wrong one.",
+        author: "Nicholas Sparks"
+    }
 ];
 
 static mut AUTH: Option<Auth> = None;

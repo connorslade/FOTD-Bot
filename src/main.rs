@@ -15,7 +15,7 @@ mod web;
 use common::color::*;
 use common::*;
 
-const VERSION: &str = "2.2.0";
+const VERSION: &str = "2.3.0";
 const SPINNER: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 fn main() {
