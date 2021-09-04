@@ -2,7 +2,14 @@ use afire::*;
 
 mod routes;
 
-pub fn start(ip: &str, port: u16, email_auth: Auth) {
+pub fn start(
+    ip: &str,
+    port: u16,
+    email_auth: Auth,
+    base_url: String,
+    template_path: String,
+    user_path: String,
+) {
     let mut server: Server = Server::new(ip, port);
 
     // Add Logger and Rate Limiter
@@ -13,7 +20,7 @@ pub fn start(ip: &str, port: u16, email_auth: Auth) {
     routes::serve_static::add_route(&mut server);
 
     // Process Unsub requests
-    routes::unsub::add_route(&mut server, email_auth);
+    routes::unsub::add_route(&mut server, email_auth, base_url, template_path, user_path);
 
     server.start();
 }

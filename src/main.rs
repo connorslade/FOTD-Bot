@@ -36,15 +36,17 @@ fn main() {
     config.read().ok().expect("Error reading the config file");
 
     // Read some values from the config file
-    let template =
-        fs::read_to_string(&cfg_get(&config, "templatePath")).expect("Error Reading Template");
-    let users = user_array_from_file(&cfg_get(&config, "emailListPath"));
+    let template = fs::read_to_string(&format!("{}/index.html", cfg_get(&config, "templatePath")))
+        .expect("Error Reading Template");
+    let template_path = cfg_get(&config, "templatePath");
+    let user_path = cfg_get(&config, "emailListPath");
     let send_time = SendTime::from_str(&cfg_get(&config, "sendTime"));
     let subject = cfg_get(&config, "subject");
     let server = cfg_get(&config, "server");
     let sender_name = cfg_get(&config, "senderName");
     let username = cfg_get(&config, "username");
     let password = cfg_get(&config, "password");
+    let web_url = cfg_get(&config, "webUrl");
     let web_auth = web::Auth::new(
         cfg_get(&config, "username"),
         cfg_get(&config, "password"),
@@ -63,8 +65,9 @@ fn main() {
             &port.to_string()
         );
 
+        let clone_web_url = web_url.clone();
         thread::spawn(move || {
-            web::start(&ip, port, web_auth);
+            web::start(&ip, port, web_auth, clone_web_url, template_path, user_path);
         });
     }
 
@@ -86,6 +89,7 @@ fn main() {
             if send_time.is_time() && !locked {
                 locked = true;
                 let local_date = Local::now().format("%Y-%m-%d").to_string();
+                let users = user_array_from_file(&cfg_get(&config, "emailListPath"));
 
                 println!(
                     "\x1b[2K\r{} {}",
@@ -102,7 +106,8 @@ fn main() {
                     &subject.replace("&1", &local_date),
                     &template
                         .replace("{{DATE}}", &local_date)
-                        .replace("{{FOTD}}", &fotd),
+                        .replace("{{FOTD}}", &fotd)
+                        .replace("{{BASE_URL}}", &web_url),
                     &server,
                     &username,
                     &password,

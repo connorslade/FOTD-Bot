@@ -5,6 +5,10 @@ body {
   margin: 0;
 }
 
+a {
+  color: #58a6ff;
+}
+
 .content {
   margin: 8px;
   padding: 10px;
@@ -23,9 +27,6 @@ body {
 .footer * {
   margin: 8px;
   padding: 10px;
-}
-.footer a {
-  color: #58a6ff;
 }
 
 .cat {
