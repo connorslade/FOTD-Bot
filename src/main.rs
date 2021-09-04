@@ -50,6 +50,7 @@ fn main() {
     let web_auth = web::Auth::new(
         cfg_get(&config, "username"),
         cfg_get(&config, "password"),
+        cfg_get(&config, "senderName"),
         cfg_get(&config, "server"),
     );
 

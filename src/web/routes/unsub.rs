@@ -178,7 +178,11 @@ pub fn add_route(
 fn quick_email(email_auth: &mut Auth, to: String, subject: String, body: String) -> Option<()> {
     // Build the message
     let email = match Message::builder()
-        .from(email_auth.username.parse().unwrap())
+        .from(
+            format!("{} <{}>", email_auth.name, email_auth.username)
+                .parse()
+                .unwrap(),
+        )
         .to(to.parse().unwrap())
         .subject(subject)
         .header(header::ContentType::TEXT_HTML)

@@ -28,14 +28,16 @@ pub fn start(
 pub struct Auth {
     username: String,
     password: String,
+    name: String,
     server: String,
 }
 
 impl Auth {
-    pub fn new(username: String, password: String, server: String) -> Auth {
+    pub fn new(username: String, password: String, name: String, server: String) -> Auth {
         Auth {
             username,
             password,
+            name,
             server,
         }
     }
