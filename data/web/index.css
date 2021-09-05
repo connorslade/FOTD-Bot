@@ -9,6 +9,15 @@ a {
   color: #58a6ff;
 }
 
+.title {
+  display: inline;
+}
+
+.image {
+  transform: translateY(6px);
+  height: 36px;
+}
+
 .content {
   margin: 8px;
   padding: 10px;
