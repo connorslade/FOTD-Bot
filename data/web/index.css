@@ -36,7 +36,14 @@ a {
 }
 .footer * {
   margin: 8px;
-  padding: 10px;
+}
+.footer .copyleft {
+  margin-left: 0;
+  margin-right: 0;
+  padding-left: 0;
+  padding-right: 0;
+  display: inline-block;
+  transform: scale(-1, 1);
 }
 
 .cat {
