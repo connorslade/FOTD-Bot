@@ -173,7 +173,7 @@ pub fn add_route(
 
         // Remove email from file
         user_file = user_file.replace(&email, "").replace("\n\n", "\n");
-        if user_file.starts_with("\n") {
+        if user_file.starts_with('\n') {
             user_file.pop();
         }
 

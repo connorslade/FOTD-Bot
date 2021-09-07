@@ -136,7 +136,7 @@ pub fn add_route(
         // Add user to file only if not already in file
         if !user_file.contains(&email) {
             user_file.push_str(&format!("\n{}", email));
-            if user_file.starts_with("\n") {
+            if user_file.starts_with('\n') {
                 user_file.remove(0);
             }
             fs::write(unsafe { USER_PATH.clone() }.unwrap_or_default(), user_file).unwrap();

@@ -1,5 +1,4 @@
 use afire::*;
-use std::panic;
 
 pub use super::email::{quick_email, Auth};
 mod routes;

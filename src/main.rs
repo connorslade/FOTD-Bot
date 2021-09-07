@@ -166,7 +166,7 @@ fn user_array_from_file(path: &str) -> Vec<email::User> {
     let users: Vec<&str> = all_users.split('\n').collect();
     let mut users_vec: Vec<email::User> = Vec::new();
     for user in users {
-        if user == "" {
+        if user.is_empty() {
             continue;
         }
         users_vec.push(email::User::user_from_email(user));
