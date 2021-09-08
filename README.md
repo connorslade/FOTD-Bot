@@ -14,6 +14,7 @@
     <a href="https://github.com/Basicprogrammer10/FOTD-Bot/issues">Request Feature</a>
   <br><br>
   <a href="#"><img src="https://img.shields.io/tokei/lines/github/Basicprogrammer10/FOTD-Bot?label=Total%20Lines"></a>
+  <a href="#"><img alt="GitHub Workflow Status" src="https://img.shields.io/github/workflow/status/Basicprogrammer10/FOTD-Bot/CI?label=Build"></a>
   <a href="#"><img src="https://img.shields.io/badge/Version-2.3.0-orange"></a>
 </p>
 <br><br>
