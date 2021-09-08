@@ -18,33 +18,31 @@ pub fn get_type(path: &str) -> &str {
     }
 }
 
-/// i dont even know...
-fn append_frag(text: &mut String, frag: &mut String) {
-    if !frag.is_empty() {
-        let encoded = frag
-            .chars()
-            .collect::<Vec<char>>()
-            .chunks(2)
-            .map(|ch| u8::from_str_radix(&ch.iter().collect::<String>(), 16).unwrap())
-            .collect::<Vec<u8>>();
-        text.push_str(&std::str::from_utf8(&encoded).unwrap());
-        frag.clear();
-    }
-}
 
-/// Decode URL encoded strings
-pub fn decode_url_chars(text: &str) -> String {
-    let mut output = String::new();
-    let mut encoded_ch = String::new();
-    let mut iter = text.chars();
-    while let Some(ch) = iter.next() {
-        if ch == '%' {
-            encoded_ch.push_str(&format!("{}{}", iter.next().unwrap(), iter.next().unwrap()));
+/// Decode a url encoded string
+pub fn decode_url_chars(url: &str) -> String {
+    // Convert input to Char array
+    let url = url.chars().collect::<Vec<char>>();
+
+    let mut res = String::new();
+    let mut i = 0;
+    while i < url.len() {
+        if url[i] == '%' {
+            let mut hex = String::new();
+            try_push(&mut hex, url.get(i + 1));
+            try_push(&mut hex, url.get(i + 2));
+            res.push(u8::from_str_radix(&hex, 16).unwrap_or_default() as char);
+            i += 3;
             continue;
         }
-        append_frag(&mut output, &mut encoded_ch);
-        output.push(ch);
+        try_push(&mut res, url.get(i));
+        i += 1;
     }
-    append_frag(&mut output, &mut encoded_ch);
-    output
+    res
+}
+
+fn try_push(vec: &mut String, c: Option<&char>) {
+    if let Some(c) = c {
+        vec.push(c.clone());
+    }
 }
