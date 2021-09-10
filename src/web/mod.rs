@@ -13,6 +13,10 @@ pub fn start(
 ) {
     let mut server: Server = Server::new(ip, port);
 
+    // Add default headers
+    server.add_default_header(Header::new("X-Frame-Options", "DENY"));
+    server.add_default_header(Header::new("X-Content-Type-Options", "nosniff"));
+
     // Add Logger and Rate Limiter
     Logger::attach(&mut server, Logger::new(Level::Info, None, true));
     // RateLimiter::attach(&mut server, 10, 30);

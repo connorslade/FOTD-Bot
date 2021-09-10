@@ -182,6 +182,12 @@ impl Clone for Auth {
 }
 
 pub fn quick_email(email_auth: &mut Auth, to: String, subject: String, body: String) -> Option<()> {
+    // Get recipient
+    let to = match to.parse() {
+        Ok(to) => to,
+        Err(_) => return None,
+    };
+
     // Build the message
     let email = match Message::builder()
         .from(
@@ -189,7 +195,7 @@ pub fn quick_email(email_auth: &mut Auth, to: String, subject: String, body: Str
                 .parse()
                 .unwrap(),
         )
-        .to(to.parse().unwrap())
+        .to(to)
         .subject(subject)
         .header(header::ContentType::TEXT_HTML)
         .body(body)
