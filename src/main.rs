@@ -1,6 +1,6 @@
 use std::env;
 use std::fs;
-use std::io::Write;
+use std::io::{self, Write};
 use std::thread;
 use std::time::Duration;
 
@@ -72,6 +72,7 @@ fn main() {
         });
     }
 
+    println!();
     let mut locked = false;
 
     // TODO: Put this in its own file
@@ -80,13 +81,13 @@ fn main() {
             thread::sleep(Duration::from_millis(100));
             print!(
                 "\x1b[2K\r{} {}",
-                color::color(&format!("[{}] Waiting...", i), Color::Cyan),
+                color::color(&format!("[{}] Waiting", i), Color::Cyan),
                 color::color(
                     &format!("[{}:{}]", Local::now().hour(), Local::now().minute()),
                     Color::Blue
                 )
             );
-            std::io::stdout().flush().expect("Err flushing STD Out");
+            io::stdout().flush().expect("Err flushing STD Out");
             if send_time.is_time() && !locked {
                 locked = true;
                 let local_date = Local::now().format("%Y-%m-%d").to_string();

@@ -18,7 +18,6 @@ pub fn get_type(path: &str) -> &str {
     }
 }
 
-
 /// Decode a url encoded string
 pub fn decode_url_chars(url: &str) -> String {
     // Convert input to Char array
@@ -43,6 +42,6 @@ pub fn decode_url_chars(url: &str) -> String {
 
 fn try_push(vec: &mut String, c: Option<&char>) {
     if let Some(c) = c {
-        vec.push(c.clone());
+        vec.push(*c);
     }
 }

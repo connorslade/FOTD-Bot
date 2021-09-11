@@ -1,6 +1,7 @@
-use afire::*;
+use afire::{Header, Server};
 
 pub use super::email::{quick_email, Auth};
+mod logger;
 mod routes;
 
 pub fn start(
@@ -17,8 +18,9 @@ pub fn start(
     server.add_default_header(Header::new("X-Frame-Options", "DENY"));
     server.add_default_header(Header::new("X-Content-Type-Options", "nosniff"));
 
-    // Add Logger and Rate Limiter
-    Logger::attach(&mut server, Logger::new(Level::Info, None, true));
+    // Add Custom Logger
+    logger::attach(&mut server);
+    // Logger::attach(&mut server, Logger::new(Level::Info, None, true));
     // RateLimiter::attach(&mut server, 10, 30);
 
     // Serve Static files from DATA_DIR
