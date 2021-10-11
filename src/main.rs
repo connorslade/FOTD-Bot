@@ -12,14 +12,14 @@ use simple_config_parser::config::Config;
 mod common;
 mod email;
 mod web;
+mod webhook;
 use common::color::*;
 use common::*;
 
-const VERSION: &str = "2.3.0";
+const VERSION: &str = "2.3.1";
 const SPINNER: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 fn main() {
-    // Get Args
     let args: Vec<String> = env::args().collect();
     let config_file: &str =
         &arg_parse::get_arg_value(&args, "--config").unwrap_or("./data/config/config.cfg");
@@ -53,6 +53,28 @@ fn main() {
         cfg_get(&config, "senderName"),
         cfg_get(&config, "server"),
     );
+    let send_webhook = cfg_get(&config, "webhooksEnabled").to_lowercase() == "true";
+    let webhook = webhook::Webhook::new(
+        webhook::Service::from_string(&cfg_get(&config, "webhookService")).unwrap(),
+        cfg_get(&config, "webhookToken"),
+        cfg_get(&config, "webhookChannel"),
+    );
+
+    // Verify Webhook
+    if send_webhook {
+        match webhook.verify() {
+            Some(()) => {
+                color_print!(Color::Green, "[*] Webhook Verified");
+            }
+            None => {
+                println!(
+                    "{}",
+                    color::color_bold("[!] Webhook Verification Failed", Color::Red)
+                );
+                panic!("Webhook Verification Failed");
+            }
+        };
+    }
 
     // Start the webserver in another thread
     if cfg_get(&config, "webServer").to_lowercase() == "true" {
@@ -100,6 +122,7 @@ fn main() {
                 );
 
                 let fotd = random_fotd(cfg_get(&config, "factPath"));
+                println!("\n{:?} - {:?}", fotd, local_date);
 
                 // Init Mailer and add some users
                 let mut mailer = email::Mailer::new(
@@ -117,13 +140,28 @@ fn main() {
 
                 mailer.add_foreach(Box::new(|user| {
                     print!(
-                        "\r{}",
+                        "\x1b[2K\r{}",
                         color::color(&format!("[*] Sending: {}", user.email), Color::Yellow)
                     );
                     std::io::stdout().flush().expect("Err flushing STD Out");
                 }));
 
                 mailer.send_all().expect("Error Sending Mail...");
+
+                // Send Webhook
+                if send_webhook {
+                    match webhook.send(fotd, local_date) {
+                        Some(()) => {
+                            color_print!(Color::Green, "\x1b[2K\r[*] Sending Webhook");
+                        }
+                        None => {
+                            println!(
+                                "{}",
+                                color::color_bold("[!] Webhook Send Failed", Color::Red)
+                            );
+                        }
+                    };
+                }
             }
 
             if !send_time.is_time() {
@@ -140,7 +178,9 @@ fn cfg_get(cfg: &Config, key: &str) -> String {
 
 fn random_fotd(path: String) -> String {
     // Read Facts and pick a random one
-    let all_facts = fs::read_to_string(&path).expect("Error Reading Fact File");
+    let all_facts = fs::read_to_string(&path)
+        .expect("Error Reading Fact File")
+        .replace('\r', "");
     let facts: Vec<&str> = all_facts.split('\n').collect();
     let mut rng = rand::thread_rng();
     let fact = &facts.choose(&mut rng).unwrap();
