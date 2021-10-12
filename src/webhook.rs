@@ -2,6 +2,7 @@ use ureq;
 
 pub enum Service {
     Discord,
+    Slack,
 }
 
 pub struct Webhook {
@@ -14,6 +15,7 @@ impl Service {
     pub fn from_string(service: &str) -> Option<Service> {
         match service.to_lowercase().as_str() {
             "discord" => Some(Service::Discord),
+            "slack" => Some(Service::Slack),
             _ => None,
         }
     }
@@ -35,7 +37,7 @@ impl Webhook {
                     "https://discord.com/api/webhooks/{}/{}",
                     self.channel, self.token
                 );
-                    
+
                 match ureq::post(&url).set("Content-Type", "application/json").send_string(
                     &r#"{"embeds":[{"title":"{{TITLE}}","description":"{{MESSAGE}}","color":6053119}]}"#
                         .replace("{{TITLE}}", &title)
@@ -43,6 +45,25 @@ impl Webhook {
                 ) {
                    Ok(_) => return Some(()),
                    Err(_) => return None,
+                };
+            }
+
+            Service::Slack => {
+                let url = format!(
+                    "https://hooks.slack.com/services/{}/{}",
+                    self.channel, self.token
+                );
+
+                let to_send = r##"{"attachments":[{"title":"{{TITLE}}","text":"{{MESSAGE}}","color":"#5C5CFF"}]}"##
+                    .replace("{{TITLE}}", &title)
+                    .replace("{{MESSAGE}}", &message);
+
+                match ureq::post(&url)
+                    .set("Content-Type", "application/json")
+                    .send_string(&to_send)
+                {
+                    Ok(_) => return Some(()),
+                    Err(_) => return None,
                 };
             }
         }
@@ -61,6 +82,28 @@ impl Webhook {
                     Err(_) => None,
                 }
             }
+
+            Service::Slack => {
+                let url = format!(
+                    "https://hooks.slack.com/services/{}/{}",
+                    self.channel, self.token
+                );
+
+                match ureq::get(&url).call() {
+                    Err(ureq::Error::Status(_, resp)) => {
+                        // Ok I know it seams weird that it has been verified if thare is an Invalid Payload.
+                        // But the Token and service mut be valid to get to this point
+                        if resp.into_string().unwrap() == "invalid_payload" {
+                            return Some(());
+                        }
+                    }
+                    Ok(_) => {}
+                    Err(_) => {}
+                };
+                None
+            }
         }
     }
 }
+
+// TODO: Use a macro for the send function service options
