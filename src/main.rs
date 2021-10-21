@@ -30,7 +30,7 @@ fn main() {
             &format!("[*] Starting FOTD Bot Gen2 (V{})", VERSION),
             Color::Green
         )
-    )
+    );
 
     let mut config = Config::new(Some(config_file));
     config.read().ok().expect("Error reading the config file");
