@@ -30,7 +30,7 @@ fn main() {
             &format!("[*] Starting FOTD Bot Gen2 (V{})", VERSION),
             Color::Green
         )
-    );
+    )
 
     let mut config = Config::new(Some(config_file));
     config.read().ok().expect("Error reading the config file");
@@ -122,7 +122,6 @@ fn main() {
                 );
 
                 let fotd = random_fotd(cfg_get(&config, "factPath"));
-                println!("\n{:?} - {:?}", fotd, local_date);
 
                 // Init Mailer and add some users
                 let mut mailer = email::Mailer::new(
