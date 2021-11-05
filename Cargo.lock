@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "afire"
-version = "0.1.7"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ecd2c3cd307414bd3b3f6cae23ee8393368fdc982ad570746a4dc12bec29214"
+checksum = "7e8c8a221624dfe4dbb697fadb8e3033a01cc58fa7ef8562edddeb76ce64093d"
 
 [[package]]
 name = "autocfg"

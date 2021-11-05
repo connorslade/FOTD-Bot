@@ -7,7 +7,7 @@ version = "2.3.2"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-afire = "0.1.7"
+afire = "0.2.0"
 chrono = "0.4"
 lettre = "0.10.0-rc.3"
 rand = "0.8.4"

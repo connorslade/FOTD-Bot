@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use afire::{Header, Server};
 
 pub use super::email::{quick_email, Auth};
@@ -24,6 +26,8 @@ pub fn start(
     logger::attach(&mut server);
     // Logger::attach(&mut server, Logger::new(Level::Info, None, true));
     // RateLimiter::attach(&mut server, 10, 30);
+
+    server.set_socket_timeout(Some(Duration::from_secs(1)));
 
     // Serve Static files from DATA_DIR
     routes::serve_static::add_route(&mut server);
