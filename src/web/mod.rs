@@ -1,6 +1,7 @@
 use afire::{Header, Server};
 
 pub use super::email::{quick_email, Auth};
+use crate::VERSION;
 mod logger;
 mod routes;
 
@@ -17,6 +18,7 @@ pub fn start(
     // Add default headers
     server.add_default_header(Header::new("X-Frame-Options", "DENY"));
     server.add_default_header(Header::new("X-Content-Type-Options", "nosniff"));
+    server.add_default_header(Header::new("X-Version", &format!("FOTD-BOT/{}", VERSION)));
 
     // Add Custom Logger
     logger::attach(&mut server);

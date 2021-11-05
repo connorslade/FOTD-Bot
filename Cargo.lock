@@ -4,9 +4,9 @@ version = 3
 
 [[package]]
 name = "afire"
-version = "0.1.6"
+version = "0.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e04513185dc269627800b15a51eac74eb3ced73f3d134ead14eaa99b2db98613"
+checksum = "2ecd2c3cd307414bd3b3f6cae23ee8393368fdc982ad570746a4dc12bec29214"
 
 [[package]]
 name = "autocfg"
@@ -127,7 +127,7 @@ dependencies = [
 
 [[package]]
 name = "fotd_email_bot"
-version = "2.3.1"
+version = "2.3.2"
 dependencies = [
  "afire",
  "chrono",
@@ -665,9 +665,9 @@ dependencies = [
 
 [[package]]
 name = "simple_config_parser"
-version = "0.1.6"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "ca4aa1331561973f45e596d0b118aab14dab921cd46c58a3c41f1bf08235a3d8"
+checksum = "3d562b7cb7cef3d30257e59582674255342665ced8462ad861412e074c653b11"
 
 [[package]]
 name = "smallvec"

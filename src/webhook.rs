@@ -1,5 +1,3 @@
-use ureq;
-
 pub enum Service {
     Discord,
     Slack,
@@ -43,9 +41,9 @@ impl Webhook {
                         .replace("{{TITLE}}", &title)
                         .replace("{{MESSAGE}}", &message),
                 ) {
-                   Ok(_) => return Some(()),
-                   Err(_) => return None,
-                };
+                   Ok(_) => Some(()),
+                   Err(_) => None,
+                }
             }
 
             Service::Slack => {
@@ -62,9 +60,9 @@ impl Webhook {
                     .set("Content-Type", "application/json")
                     .send_string(&to_send)
                 {
-                    Ok(_) => return Some(()),
-                    Err(_) => return None,
-                };
+                    Ok(_) => Some(()),
+                    Err(_) => None,
+                }
             }
         }
     }

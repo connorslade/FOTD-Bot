@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use chrono::prelude::*;
 use rand::prelude::*;
-use simple_config_parser::config::Config;
+use simple_config_parser::Config;
 
 #[macro_use]
 mod common;
@@ -16,13 +16,13 @@ mod webhook;
 use common::color::*;
 use common::*;
 
-const VERSION: &str = "2.3.1";
+const VERSION: &str = "2.3.2";
 const SPINNER: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
 
 fn main() {
     let args: Vec<String> = env::args().collect();
     let config_file: &str =
-        &arg_parse::get_arg_value(&args, "--config").unwrap_or("./data/config/config.cfg");
+        arg_parse::get_arg_value(&args, "--config").unwrap_or("./data/config/config.cfg");
 
     println!(
         "{}",
@@ -32,8 +32,9 @@ fn main() {
         )
     );
 
-    let mut config = Config::new(Some(config_file));
-    config.read().ok().expect("Error reading the config file");
+    let config = Config::new()
+        .file(config_file)
+        .expect("Error reading the config file");
 
     // Read some values from the config file
     let template = fs::read_to_string(&format!("{}/index.html", cfg_get(&config, "templatePath")))
@@ -171,8 +172,8 @@ fn main() {
 }
 
 fn cfg_get(cfg: &Config, key: &str) -> String {
-    cfg.get(key)
-        .unwrap_or_else(|| panic!("The key '{}' was not defined in config :/", key))
+    cfg.get_str(key)
+        .unwrap_or_else(|_| panic!("The key '{}' was not defined in config :/", key))
 }
 
 fn random_fotd(path: String) -> String {

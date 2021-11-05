@@ -195,8 +195,8 @@ pub fn add_route(
                         .to_string()
                 })
                 .replace("{{EMAIL}}", &email)
-                .replace("{{QUOTE}}", &quote.quote)
-                .replace("{{AUTHOR}}", &quote.author)
+                .replace("{{QUOTE}}", quote.quote)
+                .replace("{{AUTHOR}}", quote.author)
                 .replace("{{BASE_URL}}", base_url),
             vec![Header::new("Content-Type", "text/html")],
         )
