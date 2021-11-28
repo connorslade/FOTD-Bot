@@ -54,23 +54,22 @@ fn main() {
         cfg_get(&config, "senderName"),
         cfg_get(&config, "server"),
     );
-    let send_webhook = cfg_get(&config, "webhooksEnabled").to_lowercase() == "true";
-    let webhook = webhook::Webhook::new(
-        webhook::Service::from_string(&cfg_get(&config, "webhookService")).unwrap(),
-        cfg_get(&config, "webhookToken"),
-        cfg_get(&config, "webhookChannel"),
-    );
+    let webhooks = webhook::parse_config(&config);
 
     // Verify Webhook
-    if send_webhook {
-        match webhook.verify() {
-            Some(()) => {
-                color_print!(Color::Green, "[*] Webhook Verified");
-            }
+    for i in &webhooks {
+        match i.verify() {
+            Some(()) => color_print!(
+                Color::Green,
+                &"[*] Webhook `{}` Verified".replace("{}", &i.id)
+            ),
             None => {
                 println!(
                     "{}",
-                    color::color_bold("[!] Webhook Verification Failed", Color::Red)
+                    color::color_bold(
+                        &"[!] Webhook Verification Failed for `{}`".replace("{}", &i.id),
+                        Color::Red
+                    )
                 );
                 panic!("Webhook Verification Failed");
             }
@@ -124,6 +123,23 @@ fn main() {
 
                 let fotd = random_fotd(cfg_get(&config, "factPath"));
 
+                // Send Webhooks
+                for i in &webhooks {
+                    match i.send(fotd.clone(), local_date.clone()) {
+                        Some(()) => color_print!(
+                            Color::Green,
+                            &"\x1b[2K\r[*] Sending Webhook `{}`".replace("{}", &i.id)
+                        ),
+                        None => println!(
+                            "{}",
+                            color::color_bold(
+                                &"[!] Webhook Send Failed for {}".replace("{}", &i.id),
+                                Color::Red
+                            )
+                        ),
+                    };
+                }
+
                 // Init Mailer and add some users
                 let mut mailer = email::Mailer::new(
                     users.to_vec(),
@@ -147,21 +163,6 @@ fn main() {
                 }));
 
                 mailer.send_all().expect("Error Sending Mail...");
-
-                // Send Webhook
-                if send_webhook {
-                    match webhook.send(fotd, local_date) {
-                        Some(()) => {
-                            color_print!(Color::Green, "\x1b[2K\r[*] Sending Webhook");
-                        }
-                        None => {
-                            println!(
-                                "{}",
-                                color::color_bold("[!] Webhook Send Failed", Color::Red)
-                            );
-                        }
-                    };
-                }
             }
 
             if !send_time.is_time() {
