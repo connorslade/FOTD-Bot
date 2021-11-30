@@ -16,8 +16,11 @@ mod webhook;
 use common::color::*;
 use common::*;
 
-const VERSION: &str = "2.3.4";
+const VERSION: &str = "2.3.5";
 const SPINNER: [char; 10] = ['⠋', '⠙', '⠹', '⠸', '⠼', '⠴', '⠦', '⠧', '⠇', '⠏'];
+
+// Global Fact
+pub static mut FACT: Option<String> = None;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
@@ -122,6 +125,8 @@ fn main() {
                 );
 
                 let fotd = random_fotd(cfg_get(&config, "factPath"));
+
+                unsafe { FACT = Some(fotd.clone()) }
 
                 // Send Webhooks
                 for i in &webhooks {

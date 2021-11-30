@@ -44,5 +44,8 @@ pub fn start(
     // Process Sub requests
     routes::sub::add_route(&mut server, email_auth, base_url, template_path, user_path);
 
+    // Fact Api
+    routes::fact::attach(&mut server);
+
     server.start();
 }

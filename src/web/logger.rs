@@ -17,7 +17,7 @@ pub fn attach(server: &mut Server) {
 }
 
 fn remove_address_port(address: &str) -> String {
-    address.split(':').next().unwrap_or(&"null").to_string()
+    address.split(':').next().unwrap_or("null").to_string()
 }
 
 fn slash_path(path: &str) -> String {
