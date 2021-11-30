@@ -50,6 +50,7 @@ fn main() {
     let sender_name = cfg_get(&config, "senderName");
     let username = cfg_get(&config, "username");
     let password = cfg_get(&config, "password");
+    let fact_api = cfg_get(&config, "factApi") == "true";
     let web_url = cfg_get(&config, "webUrl");
     let web_auth = web::Auth::new(
         cfg_get(&config, "username"),
@@ -93,7 +94,15 @@ fn main() {
 
         let clone_web_url = web_url.clone();
         thread::spawn(move || {
-            web::start(&ip, port, web_auth, clone_web_url, template_path, user_path);
+            web::start(
+                &ip,
+                port,
+                web_auth,
+                clone_web_url,
+                template_path,
+                user_path,
+                fact_api,
+            );
         });
     }
 

@@ -14,6 +14,7 @@ pub fn start(
     base_url: String,
     template_path: String,
     user_path: String,
+    fact_api: bool,
 ) {
     let mut server: Server = Server::new(ip, port);
 
@@ -45,7 +46,9 @@ pub fn start(
     routes::sub::add_route(&mut server, email_auth, base_url, template_path, user_path);
 
     // Fact Api
-    routes::fact::attach(&mut server);
+    if fact_api {
+        routes::fact::attach(&mut server);
+    }
 
     server.start();
 }
