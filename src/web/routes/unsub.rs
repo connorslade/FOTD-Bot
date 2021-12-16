@@ -60,7 +60,7 @@ pub fn add_route(
     }
 
     server.route(Method::POST, "/unsubscribe/real", |req| {
-        let query = Query::from_body(req.body).unwrap();
+        let query = Query::from_body(req.body_string().unwrap()).unwrap();
 
         let email = match query.get("email") {
             Some(email) => {
@@ -194,7 +194,8 @@ pub fn add_route(
             .replace("{{EMAIL}}", &email)
             .replace("{{QUOTE}}", quote.quote)
             .replace("{{AUTHOR}}", quote.author)
-            .replace("{{BASE_URL}}", base_url),).header(Header::new("Content-Type", "text/html"))
+            .replace("{{BASE_URL}}", base_url),)
+            .header(Header::new("Content-Type", "text/html"))
     });
 }
 

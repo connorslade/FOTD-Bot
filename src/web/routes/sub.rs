@@ -32,7 +32,7 @@ pub fn add_route(
     }
 
     server.route(Method::POST, "/subscribe", |req| {
-        let query = Query::from_body(req.body).unwrap();
+        let query = Query::from_body(req.body_string().unwrap()).unwrap();
 
         // Get email address
         let email = match query.get("email") {

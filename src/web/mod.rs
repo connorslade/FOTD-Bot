@@ -19,16 +19,16 @@ pub fn start(
     let mut server: Server = Server::new(ip, port);
 
     // Add default headers
-    server.add_default_header(Header::new("X-Frame-Options", "DENY"));
-    server.add_default_header(Header::new("X-Content-Type-Options", "nosniff"));
-    server.add_default_header(Header::new("X-Version", &format!("FOTD-BOT/{}", VERSION)));
+    server.default_header(Header::new("X-Frame-Options", "DENY"));
+    server.default_header(Header::new("X-Content-Type-Options", "nosniff"));
+    server.default_header(Header::new("X-Version", &format!("FOTD-BOT/{}", VERSION)));
 
     // Add Custom Logger
     logger::attach(&mut server);
     // Logger::attach(&mut server, Logger::new(Level::Info, None, true));
     // RateLimiter::attach(&mut server, 10, 30);
 
-    server.set_socket_timeout(Some(Duration::from_secs(1)));
+    server.socket_timeout(Some(Duration::from_secs(1)));
 
     // Serve Static files from DATA_DIR
     routes::serve_static::add_route(&mut server);
