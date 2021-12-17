@@ -9,7 +9,13 @@ pub fn attach(server: &mut Server) {
         Response::new().text(unsafe { FACT.clone() }.unwrap_or_default())
     });
 
-    server.route(Method::GET, "/fact", |_req| {
+    server.route(Method::GET, "/fact", |req| {
+        if let Some(i) = req.header("User-Agent") {
+            if i.contains("ScriptableWidget") {
+                return Response::new().text(unsafe { FACT.clone() }.unwrap_or_default());
+            }
+        }
+
         let file = fs::read_to_string("./data/template/fact.html")
             .unwrap()
             .replace(
