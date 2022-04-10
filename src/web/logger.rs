@@ -8,7 +8,7 @@ impl Middleware for Logger {
         let text = format!(
             "[{}] {} {}",
             remove_address_port(&req.address),
-            req.method.to_string(),
+            req.method,
             slash_path(&req.path),
         );
 
