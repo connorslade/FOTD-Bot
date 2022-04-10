@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use afire::{Header, Server};
+use afire::Server;
 
 pub use super::email::{quick_email, Auth};
 use crate::VERSION;
@@ -16,19 +16,16 @@ pub fn start(
     user_path: String,
     fact_api: bool,
 ) {
-    let mut server: Server = Server::new(ip, port);
-
-    // Add default headers
-    server.default_header(Header::new("X-Frame-Options", "DENY"));
-    server.default_header(Header::new("X-Content-Type-Options", "nosniff"));
-    server.default_header(Header::new("X-Version", &format!("FOTD-BOT/{}", VERSION)));
+    let mut server: Server = Server::new(ip, port)
+        // Add default headers
+        .default_header("X-Frame-Options", "DENY")
+        .default_header("X-Content-Type-Options", "nosniff")
+        .default_header("X-Version", &format!("FOTD-BOT/{}", VERSION))
+        // Set socket timeout
+        .socket_timeout(Duration::from_secs(1));
 
     // Add Custom Logger
     logger::attach(&mut server);
-    // Logger::attach(&mut server, Logger::new(Level::Info, None, true));
-    // RateLimiter::attach(&mut server, 10, 30);
-
-    server.socket_timeout(Some(Duration::from_secs(1)));
 
     // Serve Static files from DATA_DIR
     routes::serve_static::add_route(&mut server);

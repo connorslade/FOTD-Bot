@@ -135,7 +135,7 @@ pub fn add_route(
                     .replace("{{EMAIL}}", &email)
                     .replace("{{WHY}}", &why),
             )
-            .header(Header::new("Content-Type", "text/html"))
+            .header("Content-Type", "text/html")
     });
 
     server.route(Method::GET, "/unsubscribe/confirm/real", |req| {
@@ -195,7 +195,7 @@ pub fn add_route(
             .replace("{{QUOTE}}", quote.quote)
             .replace("{{AUTHOR}}", quote.author)
             .replace("{{BASE_URL}}", base_url),)
-            .header(Header::new("Content-Type", "text/html"))
+            .header("Content-Type", "text/html")
     });
 }
 

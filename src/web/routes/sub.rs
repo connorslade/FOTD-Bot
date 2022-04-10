@@ -94,7 +94,7 @@ pub fn add_route(
                     .unwrap_or_else(|_| "done. email sent to {{EMAIL}} to confirm sub!".to_string())
                     .replace("{{EMAIL}}", &email),
             )
-            .header(Header::new("Content-Type", "text/html"))
+            .header("Content-Type", "text/html")
     });
 
     server.route(Method::GET, "/subscribe/confirm/real", |req| {
@@ -147,6 +147,6 @@ pub fn add_route(
                     })
                     .replace("{{EMAIL}}", &email),
             )
-            .header(Header::new("Content-Type", "text/html"))
+            .header("Content-Type", "text/html")
     });
 }

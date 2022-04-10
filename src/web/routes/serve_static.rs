@@ -8,11 +8,11 @@ use super::super::super::common::common;
 const DATA_DIR: &str = "data/web";
 
 pub fn add_route(server: &mut afire::Server) {
-    server.all(serve);
+    server.route(Method::GET, "**", serve);
 }
 
 fn serve(req: Request) -> Response {
-    let mut path = format!("{}{}", DATA_DIR, req.path.replace("/..", ""));
+    let mut path = format!("{}{}", DATA_DIR, safe_path(req.path));
 
     // Add Index.html if path ends with /
     if path.ends_with('/') {
@@ -29,7 +29,7 @@ fn serve(req: Request) -> Response {
         // If its found send it as response
         Ok(content) => Response::new()
             .bytes(content)
-            .header(Header::new("Content-Type", common::get_type(&path))),
+            .header("Content-Type", common::get_type(&path)),
 
         // If not send 404.html
         Err(_) => Response::new()
@@ -38,6 +38,14 @@ fn serve(req: Request) -> Response {
                 fs::read(format!("{}/404.html", DATA_DIR))
                     .unwrap_or_else(|_| "Not Found :/".as_bytes().to_owned()),
             )
-            .header(Header::new("Content-Type", "text/html")),
+            .header("Content-Type", "text/html"),
     }
+}
+
+#[inline]
+fn safe_path(mut path: String) -> String {
+    while path.contains("/..") {
+        path = path.replace("/..", "");
+    }
+    path
 }

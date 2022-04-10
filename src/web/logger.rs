@@ -1,8 +1,10 @@
 use super::super::common::color::{self, Color};
-use afire::Server;
+use afire::{middleware::Middleware, Request, Response, Server};
 
-pub fn attach(server: &mut Server) {
-    server.middleware(Box::new(|req| {
+struct Logger;
+
+impl Middleware for Logger {
+    fn end(&self, req: Request, _res: Response) {
         let text = format!(
             "[{}] {} {}",
             remove_address_port(&req.address),
@@ -11,9 +13,11 @@ pub fn attach(server: &mut Server) {
         );
 
         color_print!(Color::Blue, "\x1b[2K\r{}", &text);
+    }
+}
 
-        None
-    }));
+pub fn attach(server: &mut Server) {
+    Logger.attach(server);
 }
 
 fn remove_address_port(address: &str) -> String {
