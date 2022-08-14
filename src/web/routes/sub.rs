@@ -3,6 +3,7 @@ use rand::Rng;
 use std::collections::HashMap;
 use std::fs;
 use std::sync::Arc;
+use std::fmt::Write;
 
 use crate::{common::common, email::Auth, web::quick_email, App};
 
@@ -75,7 +76,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         quick_email(
-            unsafe { AUTH.as_mut().unwrap() },
+            unsafe { AUTH.as_ref().unwrap() },
             email.clone(),
             "FOTD BOT Subscription".to_string(),
             to_send.replace("{{URL}}", &confirm_url),
@@ -118,13 +119,13 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         // Add User to 'database'
         let mut user_file =
             match fs::read_to_string(unsafe { USER_PATH.clone() }.unwrap_or_default()) {
-                Ok(content) => content.replace("\r", ""),
+                Ok(content) => content.replace('\r', ""),
                 Err(_) => return Response::new().status(500).text("Internal Error..."),
             };
 
         // Add user to file only if not already in file
         if !user_file.contains(&email) {
-            user_file.push_str(&format!("\n{}", email));
+            write!(user_file, "\n{}", email);
             user_file = user_file.replace("\n\n", "\n");
             if user_file.starts_with('\n') {
                 user_file.remove(0);

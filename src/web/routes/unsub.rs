@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::fs;
 use std::sync::Arc;
 
-use crate::{common::common, email::Auth, web::quick_email, App};
+use crate::{common::common, web::quick_email, App};
 
 /// Dir to find files to serve
 const DATA_DIR: &str = "data/web";
@@ -41,22 +41,15 @@ const QUOTES: [Quote; 7] = [
     },
 ];
 
-static mut AUTH: Option<Auth> = None;
-static mut BASE_URL: Option<String> = None;
-static mut TEMPLATE_PATH: Option<String> = None;
-static mut USER_PATH: Option<String> = None;
 static mut UNSUB_CODES: Option<HashMap<String, String>> = None;
 
 pub fn attach(server: &mut afire::Server, app: Arc<App>) {
     unsafe {
-        AUTH = Some(app.config.web_auth.clone());
-        BASE_URL = Some(app.config.web_url.clone());
-        TEMPLATE_PATH = Some(app.config.template_path.clone());
-        USER_PATH = Some(app.config.user_path.clone());
         UNSUB_CODES = Some(HashMap::new());
     }
 
-    server.route(Method::POST, "/unsubscribe/real", |req| {
+    let aapp = app.clone();
+    server.route(Method::POST, "/unsubscribe/real", move |req| {
         let query = Query::from_body(req.body_string().unwrap()).unwrap();
 
         let email = match query.get("email") {
@@ -80,8 +73,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         // Check if email is in database
-        let content = fs::read_to_string(unsafe { USER_PATH.clone() }.unwrap_or_default())
-            .unwrap_or_default();
+        let content = fs::read_to_string(&aapp.config.user_path).unwrap_or_default();
         if !content.contains(&email) {
             return Response::new()
                 .text("You're not even subscribed.\nwhat are you trying to do???");
@@ -103,21 +95,20 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
                 .unwrap()
                 .insert(random_chars.clone(), email.clone());
         }
-        let mut confirm_url = unsafe { BASE_URL.clone() }
-            .unwrap_or_else(|| "https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_string());
-        confirm_url.push_str(&format!("/unsubscribe/confirm?code={}", random_chars));
+        let confirm_url = format!(
+            "{}/unsubscribe/confirm?code={}",
+            aapp.config.web_url, random_chars
+        );
 
         // Try to read File
-        let to_send = match fs::read_to_string(format!(
-            "{}/unsubscribe.html",
-            unsafe { TEMPLATE_PATH.clone() }.unwrap_or_default()
-        )) {
-            Ok(content) => content,
-            Err(_) => "Unsub: {{URL}}".to_string(),
-        };
+        let to_send =
+            match fs::read_to_string(format!("{}/unsubscribe.html", aapp.config.template_path)) {
+                Ok(content) => content,
+                Err(_) => "Unsub: {{URL}}".to_string(),
+            };
 
         quick_email(
-            unsafe { AUTH.as_mut().unwrap() },
+            &aapp.config.web_auth,
             email.clone(),
             "FOTD BOT Unnsub".to_string(),
             to_send.replace("{{URL}}", &confirm_url),
@@ -135,7 +126,8 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
             .header("Content-Type", "text/html")
     });
 
-    server.route(Method::GET, "/unsubscribe/confirm/real", |req| {
+    let aapp = app;
+    server.route(Method::GET, "/unsubscribe/confirm/real", move |req| {
         let code = match req.query.get("code") {
             Some(code) => common::decode_url_chars(&code),
             None => return Response::new().status(400).text("No Code supplied???"),
@@ -162,8 +154,8 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
 
         // Remove from 'database'
         let mut user_file =
-            match fs::read_to_string(unsafe { USER_PATH.clone() }.unwrap_or_default()) {
-                Ok(content) => content.replace("\r", ""),
+            match fs::read_to_string(&aapp.config.user_path) {
+                Ok(content) => content.replace('\r', ""),
                 Err(_) => return Response::new().status(500).text("Internal Error..."),
             };
 
@@ -174,14 +166,11 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         }
 
         // Write to file
-        fs::write(unsafe { USER_PATH.clone() }.unwrap_or_default(), user_file)
+        fs::write(&aapp.config.user_path, user_file)
             .expect("Error ReWriting SendTo file");
 
         // Get a random Quote
         let quote = &QUOTES[rand::thread_rng().gen_range(0..QUOTES.len())];
-
-        let base_url = &unsafe { BASE_URL.clone() }
-            .unwrap_or_else(|| "https://www.youtube.com/watch?v=dQw4w9WgXcQ".to_string());
 
         Response::new().text(fs::read_to_string(format!("{}/unsubscribe/done/allDone.html", DATA_DIR))
             .unwrap_or_else(|_| {
@@ -191,7 +180,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
             .replace("{{EMAIL}}", &email)
             .replace("{{QUOTE}}", quote.quote)
             .replace("{{AUTHOR}}", quote.author)
-            .replace("{{BASE_URL}}", base_url),)
+            .replace("{{BASE_URL}}", &aapp.config.web_url),)
             .header("Content-Type", "text/html")
     });
 }

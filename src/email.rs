@@ -184,7 +184,7 @@ impl Clone for Auth {
     }
 }
 
-pub fn quick_email(email_auth: &mut Auth, to: String, subject: String, body: String) -> Option<()> {
+pub fn quick_email(email_auth: &Auth, to: String, subject: String, body: String) -> Option<()> {
     // Get recipient
     let to = match to.parse() {
         Ok(to) => to,

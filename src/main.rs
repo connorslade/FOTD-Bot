@@ -169,7 +169,7 @@ fn random_fotd(path: &str) -> String {
 fn user_array_from_file(path: &str) -> Vec<email::User> {
     let all_users = fs::read_to_string(&path)
         .expect("Error Reading User File")
-        .replace("\r", "");
+        .replace('\r', "");
     let users: Vec<&str> = all_users.split('\n').collect();
     let mut users_vec: Vec<email::User> = Vec::new();
     for user in users {

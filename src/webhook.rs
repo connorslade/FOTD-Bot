@@ -42,8 +42,8 @@ impl Webhook {
 
                 match ureq::post(&url).set("Content-Type", "application/json").send_string(
                     &r#"{"embeds":[{"title":"{{TITLE}}","description":"{{MESSAGE}}","color":6053119}]}"#
-                        .replace("{{TITLE}}", &title)
-                        .replace("{{MESSAGE}}", &message),
+                        .replace("{{TITLE}}", title)
+                        .replace("{{MESSAGE}}", message),
                 ) {
                    Ok(_) => Some(()),
                    Err(_) => None,
@@ -57,8 +57,8 @@ impl Webhook {
                 );
 
                 let to_send = r##"{"attachments":[{"title":"{{TITLE}}","text":"{{MESSAGE}}","color":"#5C5CFF"}]}"##
-                    .replace("{{TITLE}}", &title)
-                    .replace("{{MESSAGE}}", &message);
+                    .replace("{{TITLE}}", title)
+                    .replace("{{MESSAGE}}", message);
 
                 match ureq::post(&url)
                     .set("Content-Type", "application/json")
@@ -90,14 +90,11 @@ impl Webhook {
                     self.channel, self.token
                 );
 
-                match ureq::get(&url).call() {
-                    Err(ureq::Error::Status(_, resp)) => {
-                        // Ok I know it seams weird that it has been verified if thare is an Invalid Payload.
-                        // But the Token and service mut be valid to get to this point
-                        return resp.into_string().unwrap() == "invalid_payload";
-                    }
-                    _ => {}
-                };
+                if let Err(ureq::Error::Status(_, resp)) = ureq::get(&url).call() {
+                    // Ok I know it seams weird that it has been verified if thare is an Invalid Payload.
+                    // But the Token and service mut be valid to get to this point
+                    return resp.into_string().unwrap() == "invalid_payload";
+                }
 
                 false
             }
