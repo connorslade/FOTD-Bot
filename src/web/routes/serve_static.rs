@@ -2,7 +2,7 @@ use std::fs;
 
 use afire::*;
 
-use super::super::super::common::common;
+use crate::common::common;
 
 /// Dir to find files to serve
 const DATA_DIR: &str = "data/web";
@@ -11,6 +11,7 @@ pub fn add_route(server: &mut afire::Server) {
     server.route(Method::GET, "**", serve);
 }
 
+// from before afire had a serve static extension i guess?
 fn serve(req: Request) -> Response {
     let mut path = format!("{}{}", DATA_DIR, safe_path(req.path));
 

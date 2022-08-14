@@ -1,22 +1,15 @@
+use std::sync::Arc;
 use std::time::Duration;
 
 use afire::Server;
 
 pub use super::email::{quick_email, Auth};
-use crate::VERSION;
+use crate::{app::App, VERSION};
 mod logger;
 mod routes;
 
-pub fn start(
-    ip: &str,
-    port: u16,
-    email_auth: Auth,
-    base_url: String,
-    template_path: String,
-    user_path: String,
-    fact_api: bool,
-) {
-    let mut server: Server = Server::new(ip, port)
+pub fn start(app: Arc<App>) {
+    let mut server: Server = Server::new(&app.config.web_ip, app.config.web_port)
         // Add default headers
         .default_header("X-Frame-Options", "DENY")
         .default_header("X-Content-Type-Options", "nosniff")
@@ -31,20 +24,14 @@ pub fn start(
     routes::serve_static::add_route(&mut server);
 
     // Process Unsub requests
-    routes::unsub::add_route(
-        &mut server,
-        email_auth.clone(),
-        base_url.clone(),
-        template_path.clone(),
-        user_path.clone(),
-    );
+    routes::unsub::attach(&mut server, app.clone());
 
     // Process Sub requests
-    routes::sub::add_route(&mut server, email_auth, base_url, template_path, user_path);
+    routes::sub::attach(&mut server, app.clone());
 
     // Fact Api
-    if fact_api {
-        routes::fact::attach(&mut server);
+    if app.config.fact_api {
+        routes::fact::attach(&mut server, app);
     }
 
     server.start();

@@ -46,14 +46,17 @@ pub struct Creds {
 /// Impl User
 impl User {
     /// Make a new user
-    pub fn new(email: String, name: String) -> User {
-        User { email, name }
+    pub fn new(email: &str, name: &str) -> User {
+        User {
+            email: email.to_owned(),
+            name: name.to_owned(),
+        }
     }
 
     pub fn user_from_email(email: &str) -> User {
         let mut split = email.split('@');
         let name = split.next().unwrap();
-        User::new(email.to_string(), name.to_string())
+        User::new(email, name)
     }
 }
 
@@ -74,7 +77,7 @@ impl std::fmt::Debug for User {
 // Impl Clone for user
 impl Clone for User {
     fn clone(&self) -> User {
-        User::new(self.email.clone(), self.name.clone())
+        User::new(&self.email, &self.name)
     }
 }
 

@@ -2,16 +2,15 @@ use afire::*;
 use rand::Rng;
 use std::collections::HashMap;
 use std::fs;
+use std::sync::Arc;
 
-use super::super::super::common::common;
-use super::super::quick_email;
-use super::super::Auth;
+use crate::{common::common, email::Auth, web::quick_email, App};
 
 /// Dir to find files to serve
 const DATA_DIR: &str = "data/web";
 
 /// Fun Quotes to show on unsubscribe page
-const QUOTES: [Quote; 6] = [
+const QUOTES: [Quote; 7] = [
     Quote {
         quote: "Go, throw yourself into the sea!",
         author: "Jesus",
@@ -36,6 +35,10 @@ const QUOTES: [Quote; 6] = [
         quote: "You always have a choice. It's just that some people make the wrong one.",
         author: "Nicholas Sparks",
     },
+    Quote {
+        quote: "you egg! stab",
+        author: "shakespeare",
+    },
 ];
 
 static mut AUTH: Option<Auth> = None;
@@ -44,18 +47,12 @@ static mut TEMPLATE_PATH: Option<String> = None;
 static mut USER_PATH: Option<String> = None;
 static mut UNSUB_CODES: Option<HashMap<String, String>> = None;
 
-pub fn add_route(
-    server: &mut afire::Server,
-    auth: Auth,
-    base_url: String,
-    template_path: String,
-    user_path: String,
-) {
+pub fn attach(server: &mut afire::Server, app: Arc<App>) {
     unsafe {
-        AUTH = Some(auth);
-        BASE_URL = Some(base_url);
-        TEMPLATE_PATH = Some(template_path);
-        USER_PATH = Some(user_path);
+        AUTH = Some(app.config.web_auth.clone());
+        BASE_URL = Some(app.config.web_url.clone());
+        TEMPLATE_PATH = Some(app.config.template_path.clone());
+        USER_PATH = Some(app.config.user_path.clone());
         UNSUB_CODES = Some(HashMap::new());
     }
 

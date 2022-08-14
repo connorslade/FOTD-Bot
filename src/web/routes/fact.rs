@@ -1,30 +1,30 @@
-use std::fs;
+use std::{fs, sync::Arc};
 
-use afire::{Method, Response, Server};
+use afire::{Content, Method, Response, Server};
 
-use crate::FACT;
+use crate::App;
 
-pub fn attach(server: &mut Server) {
-    server.route(Method::GET, "/api/fact", |_req| {
-        Response::new().text(unsafe { FACT.clone() }.unwrap_or_default())
+pub fn attach(server: &mut Server, app: Arc<App>) {
+    let aapp = app.clone();
+    server.route(Method::GET, "/api/fact", move |_req| {
+        Response::new()
+            .text(aapp.fact.read().unwrap())
+            .content(Content::TXT)
     });
 
-    server.route(Method::GET, "/fact", |req| {
+    let aapp = app.clone();
+    server.route(Method::GET, "/fact", move |req| {
         if let Some(i) = req.header("User-Agent") {
             if i.contains("ScriptableWidget") {
-                return Response::new().text(unsafe { FACT.clone() }.unwrap_or_default());
+                return Response::new()
+                    .text(aapp.fact.read().unwrap())
+                    .content(Content::TXT);
             }
         }
 
         let file = fs::read_to_string("./data/template/fact.html")
             .unwrap()
-            .replace(
-                "{{FACT}}",
-                &unsafe { FACT.clone() }
-                    .unwrap_or_else(|| "There will be new a fact tomorrow.".to_owned()),
-            );
-        Response::new()
-            .text(file)
-            .header("Content-Type", "text/html")
+            .replace("{{FACT}}", app.fact.read().unwrap().as_str());
+        Response::new().text(file).content(Content::HTML)
     });
 }

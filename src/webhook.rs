@@ -32,7 +32,7 @@ impl Webhook {
         }
     }
 
-    pub fn send(&self, message: String, title: String) -> Option<()> {
+    pub fn send(&self, message: &str, title: &str) -> Option<()> {
         match self.service {
             Service::Discord => {
                 let url = format!(
@@ -71,7 +71,9 @@ impl Webhook {
         }
     }
 
-    pub fn verify(&self) -> Option<()> {
+    /// True => Valid Webhook
+    /// False => Invalid Webhook
+    pub fn verify(&self) -> bool {
         match self.service {
             Service::Discord => {
                 let url = format!(
@@ -79,10 +81,7 @@ impl Webhook {
                     self.channel, self.token
                 );
 
-                match ureq::get(&url).call() {
-                    Ok(_) => Some(()),
-                    Err(_) => None,
-                }
+                ureq::get(&url).call().is_ok()
             }
 
             Service::Slack => {
@@ -95,14 +94,12 @@ impl Webhook {
                     Err(ureq::Error::Status(_, resp)) => {
                         // Ok I know it seams weird that it has been verified if thare is an Invalid Payload.
                         // But the Token and service mut be valid to get to this point
-                        if resp.into_string().unwrap() == "invalid_payload" {
-                            return Some(());
-                        }
+                        return resp.into_string().unwrap() == "invalid_payload";
                     }
-                    Ok(_) => {}
-                    Err(_) => {}
+                    _ => {}
                 };
-                None
+
+                false
             }
         }
     }
