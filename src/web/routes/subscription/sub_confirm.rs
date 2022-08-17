@@ -1,5 +1,4 @@
 use afire::prelude::*;
-use std::fmt::Write;
 use std::fs;
 use std::sync::Arc;
 
@@ -18,7 +17,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         };
 
         // Get email from hashmap
-        let email = match app.sub_codes.read().unwrap().get(&code) {
+        let email = match app.sub_codes.lock().get(&code) {
             Some(email) => {
                 if email.is_empty() {
                     return Response::new().status(400).text("Invalid Code");
@@ -29,23 +28,13 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         };
 
         // Remove from hashmap
-        app.sub_codes.write().unwrap().remove(&code);
+        app.sub_codes.lock().remove(&code);
 
-        // Add User to 'database'
-        let mut user_file = match fs::read_to_string(&app.config.user_path) {
-            Ok(content) => content.replace('\r', ""),
-            Err(_) => return Response::new().status(500).text("Internal Error..."),
-        };
-
-        // Add user to file only if not already in file
-        if !user_file.contains(&email) {
-            write!(user_file, "\n{}", email).unwrap();
-            user_file = user_file.replace("\n\n", "\n");
-            if user_file.starts_with('\n') {
-                user_file.remove(0);
-            }
-            fs::write(&app.config.user_path, user_file).unwrap();
-        }
+        // Add User to database
+        app.database
+            .lock()
+            .execute("INSERT INTO users VALUES (?)", [&email])
+            .unwrap();
 
         Response::new()
             .text(

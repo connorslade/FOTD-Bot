@@ -21,8 +21,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         // If email is already subscribed dont send email etc.
-        let content = fs::read_to_string(&app.config.user_path).unwrap_or_default();
-        if content.contains(&email) {
+        if common::is_subbed(&app, &email) {
             return Response::new().text("Your Already Subscribed!\nNo need to subscribe again!");
         }
 
@@ -37,9 +36,8 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
 
         // Add to hashmap
         app.sub_codes
-            .write()
-            .unwrap()
-            .insert(random_chars.clone(), email.clone());
+            .lock()
+            .insert(random_chars.to_owned(), email.to_owned());
         let confirm_url = &format!(
             "{}/subscribe/confirm?code={}",
             app.config.web_url, random_chars

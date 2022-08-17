@@ -30,8 +30,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         // Check if email is in database
-        let content = fs::read_to_string(&app.config.user_path).unwrap_or_default();
-        if !content.contains(&email) {
+        if !common::is_subbed(&app, &email) {
             return Response::new()
                 .text("You're not even subscribed.\nwhat are you trying to do???");
         }
@@ -47,8 +46,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
 
         // Add to hashmap
         app.unsub_codes
-            .write()
-            .unwrap()
+            .lock()
             .insert(random_chars.clone(), email.clone());
         let confirm_url = format!(
             "{}/unsubscribe/confirm?code={}",

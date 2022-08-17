@@ -21,23 +21,21 @@ pub struct Config {
     // Email
     pub server: String,
     pub sender_name: String,
-    pub user_path: String,
     pub username: String,
     pub password: String,
     pub subject: String,
 
     // Misc
-    pub fact_path: String,
+    pub database_path: PathBuf,
     pub send_time: SendTime,
     pub webhooks: Vec<Webhook>,
 }
 
 impl From<scp::Config> for Config {
     fn from(cfg: scp::Config) -> Self {
-        let fact_path = cfg_get(&cfg, "factPath");
+        let database_path = Path::new(&cfg_get(&cfg, "databasePath")).to_path_buf();
         let data_path = Path::new(&cfg_get(&cfg, "dataPath")).to_path_buf();
         let webhooks = webhook::parse_config(&cfg);
-        let user_path = cfg_get(&cfg, "emailListPath");
         let send_time = SendTime::from_str(&cfg_get(&cfg, "sendTime"));
         let subject = cfg_get(&cfg, "subject");
         let server = cfg_get(&cfg, "server");
@@ -57,7 +55,7 @@ impl From<scp::Config> for Config {
         );
 
         Config {
-            fact_path,
+            database_path,
             fact_api,
             password,
             send_time,
@@ -65,7 +63,6 @@ impl From<scp::Config> for Config {
             server,
             subject,
             data_path,
-            user_path,
             username,
             web_auth,
             web_ip,

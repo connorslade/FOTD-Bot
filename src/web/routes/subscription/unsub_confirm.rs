@@ -13,7 +13,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         };
 
         // Get email from hashmap
-        let email = match app.unsub_codes.read().unwrap().get(&code) {
+        let email = match app.unsub_codes.lock().get(&code) {
             Some(email) => email.clone().to_lowercase(),
             None => return Response::new().status(400).text("Invalid Code - Sorwy"),
         };
@@ -27,22 +27,13 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         }
 
         // Remove from hashmap
-        app.unsub_codes.write().unwrap().remove(&code);
+        app.unsub_codes.lock().remove(&code);
 
-        // Remove from 'database'
-        let mut user_file = match fs::read_to_string(&app.config.user_path) {
-            Ok(content) => content.replace('\r', ""),
-            Err(_) => return Response::new().status(500).text("Internal Error..."),
-        };
-
-        // Remove email from file
-        user_file = user_file.replace(&email, "").replace("\n\n", "\n");
-        if user_file.starts_with('\n') {
-            user_file.pop();
-        }
-
-        // Write to file
-        fs::write(&app.config.user_path, user_file).expect("Error ReWriting SendTo file");
+        // Remove from database
+        app.database
+            .lock()
+            .execute("DELETE FROM users WHERE email = ?", [&email])
+            .unwrap();
 
         // Get a random Quote
         let quote = &QUOTES[rand::thread_rng().gen_range(0..QUOTES.len())];
