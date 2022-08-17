@@ -1,3 +1,4 @@
+use std::collections::HashMap;
 use std::env;
 use std::sync::RwLock;
 
@@ -8,6 +9,9 @@ use crate::{common::arg_parse, config::Config};
 pub struct App {
     pub config: Config,
     pub fact: RwLock<String>,
+
+    pub sub_codes: RwLock<HashMap<String, String>>,
+    pub unsub_codes: RwLock<HashMap<String, String>>,
 }
 
 impl App {
@@ -23,6 +27,8 @@ impl App {
                     .expect("Error reading the config file"),
             ),
             fact: RwLock::new(String::new()),
+            sub_codes: RwLock::new(HashMap::new()),
+            unsub_codes: RwLock::new(HashMap::new()),
         }
     }
 }

@@ -1,6 +1,5 @@
 use afire::*;
 use rand::Rng;
-use std::collections::HashMap;
 use std::fs;
 use std::sync::Arc;
 
@@ -9,8 +8,8 @@ use crate::{common::common, web::quick_email, App};
 /// Dir to find files to serve
 const DATA_DIR: &str = "data/web";
 
-/// Fun Quotes to show on unsubscribe page
-const QUOTES: [Quote; 7] = [
+/// ***Fun*** Quotes to show on unsubscribe page
+const QUOTES: [Quote; 8] = [
     Quote {
         quote: "Go, throw yourself into the sea!",
         author: "Jesus",
@@ -39,15 +38,13 @@ const QUOTES: [Quote; 7] = [
         quote: "you egg! stab",
         author: "shakespeare",
     },
+    Quote {
+        quote: "skill issue,,,",
+        author: "mr prez darren!?",
+    },
 ];
 
-static mut UNSUB_CODES: Option<HashMap<String, String>> = None;
-
 pub fn attach(server: &mut afire::Server, app: Arc<App>) {
-    unsafe {
-        UNSUB_CODES = Some(HashMap::new());
-    }
-
     let aapp = app.clone();
     server.route(Method::POST, "/unsubscribe/real", move |req| {
         let query = Query::from_body(req.body_string().unwrap()).unwrap();
@@ -89,12 +86,10 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         let random_chars = String::from_utf8(random_chars).unwrap();
 
         // Add to hashmap
-        unsafe {
-            UNSUB_CODES
-                .as_mut()
-                .unwrap()
-                .insert(random_chars.clone(), email.clone());
-        }
+        aapp.unsub_codes
+            .write()
+            .unwrap()
+            .insert(random_chars.clone(), email.clone());
         let confirm_url = format!(
             "{}/unsubscribe/confirm?code={}",
             aapp.config.web_url, random_chars
@@ -126,7 +121,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
             .header("Content-Type", "text/html")
     });
 
-    let aapp = app;
+    let aapp = app.clone();
     server.route(Method::GET, "/unsubscribe/confirm/real", move |req| {
         let code = match req.query.get("code") {
             Some(code) => common::decode_url_chars(&code),
@@ -134,7 +129,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         // Get email from hashmap
-        let email = match unsafe { UNSUB_CODES.as_ref().unwrap() }.get(&code) {
+        let email = match aapp.unsub_codes.read().unwrap().get(&code) {
             Some(email) => email.clone().to_lowercase(),
             None => return Response::new().status(400).text("Invalid Code - Sorwy"),
         };
@@ -148,9 +143,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         }
 
         // Remove from hashmap
-        unsafe {
-            UNSUB_CODES.as_mut().unwrap().remove(&code);
-        }
+            app.unsub_codes.write().unwrap().remove(&code);
 
         // Remove from 'database'
         let mut user_file =

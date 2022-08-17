@@ -1,6 +1,5 @@
 use afire::*;
 use rand::Rng;
-use std::collections::HashMap;
 use std::fmt::Write;
 use std::fs;
 use std::sync::Arc;
@@ -10,13 +9,7 @@ use crate::{common::common, web::quick_email, App};
 /// Dir to find files to serve
 const DATA_DIR: &str = "data/web";
 
-static mut SUB_CODES: Option<HashMap<String, String>> = None;
-
 pub fn attach(server: &mut afire::Server, app: Arc<App>) {
-    unsafe {
-        SUB_CODES = Some(HashMap::new());
-    }
-
     let aapp = app.clone();
     server.route(Method::POST, "/subscribe", move |req| {
         let query = Query::from_body(req.body_string().unwrap()).unwrap();
@@ -48,12 +41,10 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         let random_chars = String::from_utf8(random_chars).unwrap();
 
         // Add to hashmap
-        unsafe {
-            SUB_CODES
-                .as_mut()
-                .unwrap()
-                .insert(random_chars.clone(), email.clone());
-        }
+        aapp.sub_codes
+            .write()
+            .unwrap()
+            .insert(random_chars.clone(), email.clone());
         let confirm_url = &format!(
             "{}/subscribe/confirm?code={}",
             aapp.config.web_url, random_chars
@@ -82,7 +73,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
             .header("Content-Type", "text/html")
     });
 
-    let aapp = app;
+    let aapp = app.clone();
     server.route(Method::GET, "/subscribe/confirm/real", move |req| {
         let code = match req.query.get("code") {
             Some(code) => {
@@ -95,7 +86,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         // Get email from hashmap
-        let email = match unsafe { SUB_CODES.as_ref().unwrap() }.get(&code) {
+        let email = match app.sub_codes.read().unwrap().get(&code) {
             Some(email) => {
                 if email.is_empty() {
                     return Response::new().status(400).text("Invalid Code");
@@ -106,7 +97,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         };
 
         // Remove from hashmap
-        unsafe { SUB_CODES.as_mut() }.unwrap().remove(&code);
+        app.sub_codes.write().unwrap().remove(&code);
 
         // Add User to 'database'
         let mut user_file = match fs::read_to_string(&aapp.config.user_path) {
