@@ -7,6 +7,7 @@ pub use super::email::{quick_email, Auth};
 use crate::{app::App, VERSION};
 mod logger;
 mod routes;
+mod serve_static;
 
 pub fn start(app: Arc<App>) {
     let mut server: Server = Server::new(&app.config.web_ip, app.config.web_port)
@@ -21,18 +22,10 @@ pub fn start(app: Arc<App>) {
     logger::attach(&mut server);
 
     // Serve Static files from DATA_DIR
-    routes::serve_static::add_route(&mut server);
+    serve_static::add_route(&mut server);
 
-    // Process Unsub requests
-    routes::unsub::attach(&mut server, app.clone());
-
-    // Process Sub requests
-    routes::sub::attach(&mut server, app.clone());
-
-    // Fact Api
-    if app.config.fact_api {
-        routes::fact::attach(&mut server, app);
-    }
+    // Add routes
+    routes::attach(&mut server, app);
 
     server.start();
 }
