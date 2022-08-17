@@ -5,8 +5,6 @@ use rand::Rng;
 
 use crate::{common::common, App, Arc};
 
-const DATA_DIR: &str = "data/web";
-
 pub fn attach(server: &mut Server, app: Arc<App>) {
     server.route(Method::GET, "/unsubscribe/confirm/real", move |req| {
         let code = match req.query.get("code") {
@@ -29,14 +27,13 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         }
 
         // Remove from hashmap
-            app.unsub_codes.write().unwrap().remove(&code);
+        app.unsub_codes.write().unwrap().remove(&code);
 
         // Remove from 'database'
-        let mut user_file =
-            match fs::read_to_string(&app.config.user_path) {
-                Ok(content) => content.replace('\r', ""),
-                Err(_) => return Response::new().status(500).text("Internal Error..."),
-            };
+        let mut user_file = match fs::read_to_string(&app.config.user_path) {
+            Ok(content) => content.replace('\r', ""),
+            Err(_) => return Response::new().status(500).text("Internal Error..."),
+        };
 
         // Remove email from file
         user_file = user_file.replace(&email, "").replace("\n\n", "\n");
@@ -45,21 +42,27 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         }
 
         // Write to file
-        fs::write(&app.config.user_path, user_file)
-            .expect("Error ReWriting SendTo file");
+        fs::write(&app.config.user_path, user_file).expect("Error ReWriting SendTo file");
 
         // Get a random Quote
         let quote = &QUOTES[rand::thread_rng().gen_range(0..QUOTES.len())];
 
-        Response::new().text(fs::read_to_string(format!("{}/unsubscribe/done/allDone.html", DATA_DIR))
-            .unwrap_or_else(|_| {
-                "done. you ({{EMAIL}}) will no longer get amazing daily facts in your inbox :/"
-                    .to_string()
-            })
-            .replace("{{EMAIL}}", &email)
-            .replace("{{QUOTE}}", quote.quote)
-            .replace("{{AUTHOR}}", quote.author)
-            .replace("{{BASE_URL}}", &app.config.web_url),)
+        Response::new()
+            .text(
+                fs::read_to_string(
+                    &app.config
+                        .data_path
+                        .join("web/unsubscribe/done/allDone.html"),
+                )
+                .unwrap_or_else(|_| {
+                    "done. you ({{EMAIL}}) will no longer get amazing daily facts in your inbox :/"
+                        .to_string()
+                })
+                .replace("{{EMAIL}}", &email)
+                .replace("{{QUOTE}}", quote.quote)
+                .replace("{{AUTHOR}}", quote.author)
+                .replace("{{BASE_URL}}", &app.config.web_url),
+            )
             .header("Content-Type", "text/html")
     });
 }

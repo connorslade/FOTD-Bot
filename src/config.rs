@@ -1,4 +1,4 @@
-use std::fs;
+use std::path::{Path, PathBuf};
 
 use simple_config_parser as scp;
 
@@ -10,8 +10,7 @@ use crate::{
 
 pub struct Config {
     // Web
-    pub template: String,
-    pub template_path: String,
+    pub data_path: PathBuf,
     pub fact_api: bool,
     pub web_url: String,
     pub web_ip: String,
@@ -36,7 +35,7 @@ pub struct Config {
 impl From<scp::Config> for Config {
     fn from(cfg: scp::Config) -> Self {
         let fact_path = cfg_get(&cfg, "factPath");
-        let template_path = cfg_get(&cfg, "templatePath");
+        let data_path = Path::new(&cfg_get(&cfg, "dataPath")).to_path_buf();
         let webhooks = webhook::parse_config(&cfg);
         let user_path = cfg_get(&cfg, "emailListPath");
         let send_time = SendTime::from_str(&cfg_get(&cfg, "sendTime"));
@@ -56,8 +55,6 @@ impl From<scp::Config> for Config {
             cfg_get(&cfg, "senderName"),
             cfg_get(&cfg, "server"),
         );
-        let template = fs::read_to_string(&format!("{}/index.html", template_path))
-            .expect("Error Reading Template");
 
         Config {
             fact_path,
@@ -67,8 +64,7 @@ impl From<scp::Config> for Config {
             sender_name,
             server,
             subject,
-            template_path,
-            template,
+            data_path,
             user_path,
             username,
             web_auth,

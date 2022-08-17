@@ -5,9 +5,6 @@ use std::sync::Arc;
 
 use crate::{common::common, web::quick_email, App};
 
-/// Dir to find files to serve
-const DATA_DIR: &str = "data/web";
-
 pub fn attach(server: &mut afire::Server, app: Arc<App>) {
     server.route(Method::POST, "/subscribe", move |req| {
         let query = Query::from_body(req.body_string().unwrap()).unwrap();
@@ -49,11 +46,12 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
         );
 
         // Try to read File
-        let to_send =
-            match fs::read_to_string(format!("{}/subscribe.html", app.config.template_path)) {
-                Ok(content) => content,
-                Err(_) => "Subscribe: {{URL}}".to_string(),
-            };
+        let to_send = match fs::read_to_string(
+            app.config.data_path.join("template").join("subscribe.html"),
+        ) {
+            Ok(content) => content,
+            Err(_) => "Subscribe: {{URL}}".to_string(),
+        };
 
         quick_email(
             &app.config.web_auth,
@@ -64,7 +62,7 @@ pub fn attach(server: &mut afire::Server, app: Arc<App>) {
 
         Response::new()
             .text(
-                fs::read_to_string(format!("{}/subscribe/done/index.html", DATA_DIR))
+                fs::read_to_string(&app.config.data_path.join("web/subscribe/done/index.html"))
                     .unwrap_or_else(|_| "done. email sent to {{EMAIL}} to confirm sub!".to_string())
                     .replace("{{EMAIL}}", &email),
             )

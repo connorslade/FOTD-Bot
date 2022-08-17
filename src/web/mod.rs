@@ -22,7 +22,7 @@ pub fn start(app: Arc<App>) {
     logger::attach(&mut server);
 
     // Serve Static files from DATA_DIR
-    serve_static::add_route(&mut server);
+    serve_static::add_route(&mut server, app.clone());
 
     // Add routes
     routes::attach(&mut server, app);

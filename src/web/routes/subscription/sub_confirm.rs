@@ -5,9 +5,6 @@ use std::sync::Arc;
 
 use crate::{common::common, App};
 
-// TODO: REMOVE THIS,,,
-const DATA_DIR: &str = "data/web";
-
 pub fn attach(server: &mut Server, app: Arc<App>) {
     server.route(Method::GET, "/subscribe/confirm/real", move |req| {
         let code = match req.query.get("code") {
@@ -52,7 +49,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
 
         Response::new()
             .text(
-                &fs::read_to_string(format!("{}/subscribe/done/allDone.html", DATA_DIR))
+                &fs::read_to_string(&app.config.data_path.join("web/subscribe/done/allDone.html"))
                     .unwrap_or_else(|_| {
                         "Done! You ({{EMAIL}}) will now get daily facts in your inbox!".to_string()
                     })

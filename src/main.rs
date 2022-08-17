@@ -114,8 +114,8 @@ fn main() {
                     users.to_vec(),
                     email::User::new(&app.config.username, &app.config.sender_name),
                     &app.config.subject.replace("&1", &local_date),
-                    &app.config
-                        .template
+                    &fs::read_to_string(app.config.data_path.join("template").join("index.html"))
+                        .unwrap()
                         .replace("{{DATE}}", &local_date)
                         .replace("{{FOTD}}", &fotd)
                         .replace("{{BASE_URL}}", &app.config.web_url),
