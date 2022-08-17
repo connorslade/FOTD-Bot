@@ -3,7 +3,7 @@ use rand::Rng;
 use std::fs;
 use std::sync::Arc;
 
-use crate::{common::common, web::quick_email, App};
+use crate::{common::common, misc::email::quick_email, App};
 
 pub fn attach(server: &mut afire::Server, app: Arc<App>) {
     server.route(Method::POST, "/subscribe", move |req| {

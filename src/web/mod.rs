@@ -3,7 +3,7 @@ use std::time::Duration;
 
 use afire::Server;
 
-pub use super::email::{quick_email, Auth};
+pub use crate::misc::email::{quick_email, Auth};
 use crate::{app::App, VERSION};
 mod logger;
 mod routes;

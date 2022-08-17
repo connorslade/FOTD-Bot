@@ -33,7 +33,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         // Add User to database
         app.database
             .lock()
-            .execute("INSERT INTO users VALUES (?)", [&email])
+            .execute("INSERT OR IGNORE INTO users VALUES (?)", [&email])
             .unwrap();
 
         Response::new()
