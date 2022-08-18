@@ -150,7 +150,7 @@ dependencies = [
 
 [[package]]
 name = "fotd_email_bot"
-version = "2.3.2"
+version = "2.4.0"
 dependencies = [
  "afire",
  "chrono",

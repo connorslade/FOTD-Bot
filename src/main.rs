@@ -15,7 +15,7 @@ use common::*;
 
 use crate::app::App;
 
-const VERSION: &str = "2.3.5";
+const VERSION: &str = "2.4.0";
 
 fn main() {
     println!(
