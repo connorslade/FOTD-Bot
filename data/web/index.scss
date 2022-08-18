@@ -1,3 +1,13 @@
+@font-face {
+  font-family: "Whitney";
+  src: url("/common/fonts/Whitney-Book.otf");
+}
+
+@font-face {
+  font-family: "Whitney-Semibold";
+  src: url("/common/fonts/Whitney-Semibold.ttf");
+}
+
 body {
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   background-color: #17171a;
@@ -68,16 +78,46 @@ a {
   user-select: none;
 
   &:before {
-    content: '🙶';
+    content: "🙶";
   }
 
   &:after {
-    content: '🙷';
+    content: "🙷";
   }
 }
 
 #body {
- width: 100vw;
- height: 100vh;
- overflow: hidden;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.history-quote {
+  max-width: 500px;
+  background-color: #222531;
+  padding: 15px;
+  border-bottom: 1px #171924 solid;
+
+  &:nth-child(2) {
+    border-radius: 10px 10px 0 0;
+  }
+
+  &:last-child {
+    border-radius: 0 0 10px 10px;
+    border: none;
+  }
+
+  & .history-date {
+    font-family: "Whitney-Semibold";
+    font-size: 17px;
+    letter-spacing: 0.05em;
+    margin-bottom: 10px;
+  }
+
+  & .history-fact {
+    margin-bottom: 0;
+    font-family: "Whitney";
+    font-size: 0.875rem;
+    line-height: 1.125rem;
+  }
 }
