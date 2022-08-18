@@ -33,7 +33,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
         let db = app.database.lock();
         let mut stmt = db
             .prepare(
-                "SELECT fact, used FROM facts WHERE used IS NOT NULL AND used >= ? AND used <= ?",
+                "SELECT fact, used FROM facts WHERE used IS NOT NULL AND used >= ? AND used <= ? ORDER BY used ASC",
             )
             .unwrap();
 

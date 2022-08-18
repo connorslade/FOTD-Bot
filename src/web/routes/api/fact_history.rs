@@ -18,7 +18,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
 
         let db = app.database.lock();
         let mut stmt = db
-            .prepare("SELECT fact, used FROM facts WHERE used IS NOT NULL LIMIT ? OFFSET ?")
+            .prepare("SELECT fact, used FROM facts WHERE used IS NOT NULL ORDER BY used DESC LIMIT ? OFFSET ?")
             .unwrap();
 
         let facts = stmt
@@ -31,7 +31,7 @@ pub fn attach(server: &mut Server, app: Arc<App>) {
             .collect::<Vec<_>>();
 
         Response::new()
-            .text(json!({"page": page, "end": facts.len() < page_size, "facts": vec![facts[0].clone();20]}))
+            .text(json!({"page": page, "end": facts.len() < page_size, "facts": facts}))
             .content(Content::JSON)
     });
 }
