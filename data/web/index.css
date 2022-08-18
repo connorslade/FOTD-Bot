@@ -90,12 +90,18 @@ a {
   background-color: #222531;
   padding: 15px;
   border-bottom: 1px #171924 solid;
+  cursor: pointer;
+}
+.history-quote:hover {
+  background-color: #252a3c;
 }
 .history-quote:nth-child(2) {
-  border-radius: 10px 10px 0 0;
+  border-top-left-radius: 10px;
+  border-top-right-radius: 10px;
 }
 .history-quote:last-child {
-  border-radius: 0 0 10px 10px;
+  border-bottom-left-radius: 10px;
+  border-bottom-right-radius: 10px;
   border: none;
 }
 .history-quote .history-date {
@@ -109,6 +115,18 @@ a {
   font-family: "Whitney";
   font-size: 0.875rem;
   line-height: 1.125rem;
+}
+
+.end {
+  width: 180px;
+  margin-left: 176px;
+  text-align: center;
+  font-family: "Whitney";
+  font-size: 0.875rem;
+}
+
+.hidden {
+  display: none;
 }
 
 /*# sourceMappingURL=index.css.map */
