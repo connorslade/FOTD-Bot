@@ -112,7 +112,8 @@ fn random_fotd(app: &Arc<App>) -> String {
         .duration_since(UNIX_EPOCH)
         .unwrap()
         .as_secs()
-        / (60 * 60 * 24);
+        / (60 * 60 * 24)
+        + 1;
 
     // Update row
     db.execute(
