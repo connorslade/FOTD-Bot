@@ -1,4 +1,4 @@
-use std::{fs, sync::Arc};
+use std::sync::Arc;
 
 use afire::{Content, Method, Response, Server};
 
