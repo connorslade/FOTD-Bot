@@ -1,4 +1,16 @@
-pub mod fact;
-pub mod serve_static;
-pub mod sub;
-pub mod unsub;
+use crate::{App, Arc};
+
+use afire::Server;
+
+mod api;
+mod fact;
+mod subscription;
+
+pub fn attach(server: &mut Server, app: Arc<App>) {
+    if app.config.fact_api {
+        api::attach(server, app.clone());
+    }
+
+    fact::attach(server, app.clone());
+    subscription::attach(server, app);
+}

@@ -1,3 +1,7 @@
+use std::sync::Arc;
+
+use crate::app::App;
+
 /// Get the type MMIE content type of a file from its extension
 pub fn get_type(path: &str) -> &str {
     match path.split('.').last() {
@@ -16,6 +20,18 @@ pub fn get_type(path: &str) -> &str {
 
         None => "application/octet-stream",
     }
+}
+
+pub fn is_subbed<T: AsRef<str>>(app: &Arc<App>, email: T) -> bool {
+    app.database
+        .lock()
+        .query_row(
+            "SELECT COUNT(*) FROM users WHERE email = ?",
+            [email.as_ref()],
+            |row| row.get::<_, usize>(0),
+        )
+        .unwrap()
+        > 0
 }
 
 /// Decode a url encoded string

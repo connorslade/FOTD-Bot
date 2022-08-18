@@ -1,22 +1,16 @@
+use std::sync::Arc;
 use std::time::Duration;
 
 use afire::Server;
 
-pub use super::email::{quick_email, Auth};
-use crate::VERSION;
+pub use crate::misc::email::{quick_email, Auth};
+use crate::{app::App, VERSION};
 mod logger;
 mod routes;
+mod serve_static;
 
-pub fn start(
-    ip: &str,
-    port: u16,
-    email_auth: Auth,
-    base_url: String,
-    template_path: String,
-    user_path: String,
-    fact_api: bool,
-) {
-    let mut server: Server = Server::new(ip, port)
+pub fn start(app: Arc<App>) {
+    let mut server: Server = Server::new(&app.config.web_ip, app.config.web_port)
         // Add default headers
         .default_header("X-Frame-Options", "DENY")
         .default_header("X-Content-Type-Options", "nosniff")
@@ -28,24 +22,10 @@ pub fn start(
     logger::attach(&mut server);
 
     // Serve Static files from DATA_DIR
-    routes::serve_static::add_route(&mut server);
+    serve_static::add_route(&mut server, app.clone());
 
-    // Process Unsub requests
-    routes::unsub::add_route(
-        &mut server,
-        email_auth.clone(),
-        base_url.clone(),
-        template_path.clone(),
-        user_path.clone(),
-    );
-
-    // Process Sub requests
-    routes::sub::add_route(&mut server, email_auth, base_url, template_path, user_path);
-
-    // Fact Api
-    if fact_api {
-        routes::fact::attach(&mut server);
-    }
+    // Add routes
+    routes::attach(&mut server, app);
 
     server.start();
 }
