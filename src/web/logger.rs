@@ -1,18 +1,20 @@
 use super::super::common::color::{self, Color};
-use afire::{middleware::Middleware, Request, Response, Server};
+use afire::{error::Result, middleware::Middleware, Request, Response, Server};
 
 struct Logger;
 
 impl Middleware for Logger {
-    fn end(&self, req: Request, _res: Response) {
-        let text = format!(
-            "[{}] {} {}",
-            remove_address_port(&req.address),
-            req.method,
-            slash_path(&req.path),
-        );
+    fn end(&self, req: &Result<Request>, _res: &Response) {
+        if let Ok(req) = req {
+            let text = format!(
+                "[{}] {} {}",
+                remove_address_port(&req.address),
+                req.method,
+                slash_path(&req.path),
+            );
 
-        color_print!(Color::Blue, "\x1b[2K\r{}", &text);
+            color_print!(Color::Blue, "\x1b[2K\r{}", &text);
+        }
     }
 }
 

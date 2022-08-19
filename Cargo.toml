@@ -5,12 +5,12 @@ name = "fotd_email_bot"
 version = "2.4.0"
 
 [dependencies]
-afire = { version = "1.1.0", features = ["serve_static"] }
+afire = {version = "1.2.0", features = ["extensions"]}
 chrono = "0.4"
 lettre = "0.10.0-rc.3"
-rand = "0.8.4"
-simple_config_parser = "1.0.0"
-rusqlite = { version = "0.28.0", features = ["bundled"] }
-ureq = "2.2.0"
 parking_lot = "0.12.1"
-serde_json = "1.0.83"
+rand = "0.8.4"
+rusqlite = {version = "0.28.0", features = ["bundled"]}
+serde_json = "1.0.82"
+simple_config_parser = "1.0.0"
+ureq = "2.2.0"
