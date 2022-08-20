@@ -55,7 +55,7 @@ impl User {
 
     pub fn user_from_email(email: &str) -> User {
         let mut split = email.rsplitn(2, '@');
-        let name = split.next().unwrap();
+        let name = split.nth(1).unwrap();
         User::new(email, name)
     }
 }
