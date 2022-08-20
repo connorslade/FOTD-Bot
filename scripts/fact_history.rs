@@ -52,5 +52,5 @@ fn process_date(str: &str) -> u32 {
         .map(|x| x.parse::<u32>().unwrap())
         .collect::<Vec<_>>();
 
-    (NaiveDate::from_ymd(parts[0] as i32, parts[1], parts[2]).num_days_from_ce() - 719163) as u32
+    (NaiveDate::from_ymd(parts[0] as i32, parts[1], parts[2]).num_days_from_ce() - 719164) as u32
 }
