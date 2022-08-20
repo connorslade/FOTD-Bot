@@ -36,6 +36,10 @@ a {
   margin-top: 0;
 }
 
+.bold {
+  font-weight: bold;
+}
+
 .footer {
   text-align: center;
   position: fixed;

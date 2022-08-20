@@ -10,10 +10,10 @@ mod r#loop;
 mod misc;
 mod web;
 mod webhook;
+
+use app::App;
 use common::color::*;
 use common::*;
-
-use crate::app::App;
 
 const VERSION: &str = "2.4.0";
 
@@ -26,9 +26,10 @@ fn main() {
         )
     );
 
+    // Create app
     let app = Arc::new(App::from_args());
 
-    // Verify Webhook
+    // Verify webhooks
     for i in &app.config.webhooks {
         if i.verify() {
             color_print!(Color::Green, &format!("[*] Webhook `{}` Verified", i.id));
@@ -57,6 +58,5 @@ fn main() {
     }
 
     println!();
-
     r#loop::start(app);
 }
