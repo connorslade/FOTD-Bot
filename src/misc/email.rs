@@ -4,7 +4,6 @@ use lettre::Message;
 use lettre::SmtpTransport;
 use lettre::Transport;
 
-// TODO: Use these errors...
 /// Errors that can occur when sending an email.
 pub enum EmailError {
     MessageBuild,
@@ -118,7 +117,7 @@ impl Mailer {
 
             // Build the message
             let email = match Message::builder()
-                .from((&self.from.to_string()).parse().unwrap())
+                .from(self.from.to_string().parse().unwrap())
                 .to(user.to_string().parse().unwrap())
                 .subject(&self.subject)
                 .header(header::ContentType::TEXT_HTML)
@@ -131,8 +130,8 @@ impl Mailer {
 
             // Get credentials for mail server
             let creds = Credentials::new(
-                (&self.credentials.username).clone(),
-                (&self.credentials.password).clone(),
+                self.credentials.username.clone(),
+                self.credentials.password.clone(),
             );
 
             // Open a remote connection to the mail server
