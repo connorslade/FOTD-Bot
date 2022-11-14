@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use std::env;
+use std::time::UNIX_EPOCH;
+use std::{collections::HashMap, time::SystemTime};
 
 use parking_lot::Mutex;
 use rusqlite::Connection;
@@ -31,12 +32,34 @@ impl App {
         let mut database = Connection::open(&config.database_path).unwrap();
         database::init(&mut database);
 
+        // Attempt to get the days fact
+        let fact = get_todays_fact(&database);
+        if fact.is_none() {
+            println!("[-] Previous fact not found");
+        }
+
         App {
             config,
             database: Mutex::new(database),
-            fact: Mutex::new(String::new()),
+            fact: Mutex::new(fact.unwrap_or_default()),
             sub_codes: Mutex::new(HashMap::new()),
             unsub_codes: Mutex::new(HashMap::new()),
         }
     }
+}
+
+fn get_todays_fact(db: &Connection) -> Option<String> {
+    let epoch_day = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .unwrap()
+        .as_secs()
+        / (60 * 60 * 24)
+        - 1;
+
+    db.query_row(
+        "SELECT fact FROM facts WHERE used = ?",
+        [epoch_day],
+        |row| row.get::<_, String>(0),
+    )
+    .ok()
 }
