@@ -84,7 +84,12 @@ pub fn start(app: Arc<App>) {
                     std::io::stdout().flush().expect("Err flushing STD Out");
                 }));
 
-                mailer.send_all().expect("Error Sending Mail...");
+                if let Err(i) = mailer.send_all() {
+                    println!(
+                        "\n{}",
+                        color::color_bold(&format!("[!] Send Failed: {:?}", i), Color::Red)
+                    );
+                }
             }
 
             if !app.config.send_time.is_time() {
